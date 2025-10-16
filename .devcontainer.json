@@ -9,8 +9,5 @@
   "remoteEnv": {
     "GITHUB_TOKEN": "${localEnv:GITHUB_PAT_PUBLIC_REPO}"
   },
-  "postCreateCommand": "scripts/setup",
-  "forwardPorts": [
-    8080
-  ]
+  "postCreateCommand": "scripts/setup"
 }
