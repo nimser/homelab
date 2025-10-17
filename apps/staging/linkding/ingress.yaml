@@ -3,6 +3,12 @@ kind: Ingress
 metadata:
   name: linkding
   namespace: linkding
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+    traefik.ingress.kubernetes.io/frontend-entry-points: http,https
+    traefik.ingress.kubernetes.io/redirect-entry-point: https
+    traefik.ingress.kubernetes.io/redirect-permanent: "true"
 spec:
   ingressClassName: traefik
   rules:
@@ -16,3 +22,7 @@ spec:
                   number: 9090
             path: /
             pathType: Prefix
+  tls:
+    - hosts:
+        - ldp.nwo.pm
+      secretName: linkding-cert
