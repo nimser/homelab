@@ -30,3 +30,10 @@ spec:
       name: grafana-credentials
       valuesKey: adminPassword
       targetPath: grafana.adminPassword
+  values:
+    grafana:
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        hosts:
+          - gap.nwo.pm
