@@ -4,3 +4,11 @@ namespace: monitoring
 resources:
   - ../../base/kube-prometheus-stack/
   - grafana-credentials.yaml
+  - grafana-tls-cert-selfsign.yaml
+
+patches:
+  - path: release-patch-tls.yaml
+    target:
+      kind: HelmRelease
+      name: kube-prometheus-stack
+      namespace: monitoring
