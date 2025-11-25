@@ -15,5 +15,7 @@ data:
       ],
       "platform": "github",
       "gitAuthor": "Thinklab Renovate bot <bot@renovateapp.com>",
+      "onboarding": false,
+      "requireConfig": "optional",
       "autodiscover": false
     }
