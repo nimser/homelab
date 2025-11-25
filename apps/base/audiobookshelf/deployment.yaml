@@ -17,3 +17,26 @@ spec:
           image: advplyr/audiobookshelf:2.30.0
           ports:
             - containerPort: 13378
+          volumeMounts:
+            - name: audiobookshelf-config
+              mountPath: /config
+            - name: audiobookshelf-metadata
+              mountPath: /metadata
+            - name: audiobookshelf-podcasts
+              mountPath: /podcasts
+            - name: audiobookshelf-audiobooks
+              mountPath: /audiobooks
+
+      volumes:
+        - name: audiobookshelf-config
+          persistentVolumeClaim:
+            claimName: audiobookshelf-config-pvc
+        - name: audiobookshelf-metadata
+          persistentVolumeClaim:
+            claimName: audiobookshelf-metadata-pvc
+        - name: audiobookshelf-podcasts
+          persistentVolumeClaim:
+            claimName: audiobookshelf-podcasts-pvc
+        - name: audiobookshelf-audiobooks
+          persistentVolumeClaim:
+            claimName: audiobookshelf-audiobooks-pvc
