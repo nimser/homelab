@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: renovate-configmap
+  namespace: infrastructure
+data:
+  config.json: |
+    {
+      "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+      "extends": [
+        "config:base"
+      ],
+      "repositories": [
+        "nimser/homelab"
+      ],
+      "platform": "github",
+      "gitAuthor": "Thinklab Renovate bot <bot@renovateapp.com>",
+      "autodiscover": false
+    }
