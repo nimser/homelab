@@ -12,6 +12,26 @@ spec:
       labels:
         app: audiobookshelf
     spec:
+      initContainers:
+        - name: volume-permissions
+          image: busybox
+          command:
+            [
+              "sh",
+              "-c",
+              "chown -R 1000:1000 /config /metadata /podcasts /audiobooks",
+            ]
+          volumeMounts:
+            - name: audiobookshelf-config
+              mountPath: /config
+            - name: audiobookshelf-metadata
+              mountPath: /metadata
+            - name: audiobookshelf-podcasts
+              mountPath: /podcasts
+            - name: audiobookshelf-audiobooks
+              mountPath: /audiobooks
+          securityContext:
+            runAsUser: 0
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
