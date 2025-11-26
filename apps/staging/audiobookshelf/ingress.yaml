@@ -19,7 +19,7 @@ spec:
               service:
                 name: audiobookshelf
                 port:
-                  number: 13378
+                  number: 3005
             path: /
             pathType: Prefix
   tls:
