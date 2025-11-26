@@ -39,8 +39,14 @@ spec:
       containers:
         - name: audiobookshelf
           image: advplyr/audiobookshelf:2.30.0
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: audiobookshelf-configmap
+                  key: port
           ports:
-            - containerPort: 13378
+            - containerPort: 3005
           volumeMounts:
             - name: audiobookshelf-config
               mountPath: /config
