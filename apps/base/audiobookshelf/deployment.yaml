@@ -12,6 +12,10 @@ spec:
       labels:
         app: audiobookshelf
     spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       containers:
         - name: audiobookshelf
           image: advplyr/audiobookshelf:2.30.0
@@ -26,6 +30,8 @@ spec:
               mountPath: /podcasts
             - name: audiobookshelf-audiobooks
               mountPath: /audiobooks
+          securityContext:
+            allowPrivilegeEscalation: false
 
       volumes:
         - name: audiobookshelf-config
