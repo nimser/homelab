@@ -3,7 +3,6 @@ kind: Service
 metadata:
   labels:
     name: linkding
-  namespace: linkding
   name: linkding
 spec:
   ports:

@@ -38,13 +38,10 @@ spec:
         fsGroup: 1000
       containers:
         - name: audiobookshelf
-          image: advplyr/audiobookshelf:2.30.0
-          env:
-            - name: PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: audiobookshelf-configmap
-                  key: port
+          image: ghcr.io/advplyr/audiobookshelf:2.30.0
+          envFrom:
+            - configMapRef:
+                name: audiobookshelf-configmap
           ports:
             - containerPort: 3005
           volumeMounts:
