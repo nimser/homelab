@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: soft-serve
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: soft-serve
+  template:
+    metadata:
+      labels:
+        app: soft-serve
+    spec:
+      containers:
+        - name: soft-serve
+          image: ghcr.io/charmbracelet/soft-serve:v0.7.1
+          ports:
+            - containerPort: 22
+          env:
+            - name: SOFT_SERVE_INITIAL_ADMIN_KEYS
+              valueFrom:
+                secretKeyRef:
+                  name: soft-serve-admin-keys
+                  key: SOFT_SERVE_INITIAL_ADMIN_KEYS
+          volumeMounts:
+            - name: repos
+              mountPath: /soft-serve
+            - name: ssh-hostkeys
+              mountPath: /etc/ssh/hostkeys
+          securityContext:
+            allowPrivilegeEscalation: false
+
+      initContainers:
+        - name: init-hostkeys
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              cp /etc/ssh/secret-keys/ssh_host_rsa_key /etc/ssh/hostkeys/ssh_host_rsa_key
+              cp /etc/ssh/secret-keys/ssh_host_ed25519_key /etc/ssh/hostkeys/ssh_host_ed25519_key
+              chmod 600 /etc/ssh/hostkeys/ssh_host_rsa_key /etc/ssh/hostkeys/ssh_host_ed25519_key
+          volumeMounts:
+            - name: ssh-hostkeys
+              mountPath: /etc/ssh/hostkeys
+            - name: secret-hostkeys
+              mountPath: /etc/ssh/secret-keys
+              readOnly: true
+
+      volumes:
+        - name: repos
+          persistentVolumeClaim:
+            claimName: repos
+        - name: ssh-hostkeys
+          emptyDir: {}
+        - name: secret-hostkeys
+          secret:
+            secretName: soft-serve-ssh-hostkeys
+            defaultMode: 0600
