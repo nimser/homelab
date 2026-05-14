@@ -17,7 +17,3 @@ spec:
     - kind: Secret
       name: oauth-credentials
       valuesKey: values.yaml
-  values:
-    proxyConfig:
-      tags:
-        - tag:rammus-k8s
