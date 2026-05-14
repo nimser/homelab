@@ -8,7 +8,6 @@ spec:
   ports:
     - port: 22
       targetPort: 23231
-      nodePort: 30022
   selector:
     app: soft-serve
-  type: NodePort
+  type: LoadBalancer
