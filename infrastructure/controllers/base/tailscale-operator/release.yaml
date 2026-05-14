@@ -16,9 +16,7 @@ spec:
   valuesFrom:
     - kind: Secret
       name: oauth-credentials
+      valuesKey: values.yaml
   values:
-    oauth:
-      client_id: "$(client_id)"
-      client_secret: "$(client_secret)"
     proxyConfig:
       tags: "tag:tpad-k8s"
