@@ -16,7 +16,7 @@ spec:
         - name: soft-serve
           image: ghcr.io/charmbracelet/soft-serve:v0.7.1
           ports:
-            - containerPort: 22
+            - containerPort: 23231
           env:
             - name: SOFT_SERVE_INITIAL_ADMIN_KEYS
               valueFrom:
