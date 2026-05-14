@@ -1,15 +1,22 @@
 ## ADDED Requirements
 
 ### Requirement: Soft Serve Deployment
-The system SHALL deploy Soft Serve as a Kubernetes Deployment with a single replica, running in a dedicated namespace, with SSH access on port 22.
+The system SHALL deploy Soft Serve as a Kubernetes Deployment with a single replica, running in a dedicated namespace, with SSH access exposed internally via a NodePort Service.
 
 #### Scenario: Deployment is created and running
 - **WHEN** the FluxCD HelmRelease or Kustomization is applied
 - **THEN** a Soft Serve Deployment with 1 replica is running in the `soft-serve` namespace
 
-#### Scenario: SSH port is exposed
-- **WHEN** the Soft Serve pod is running
-- **THEN** port 22 is open and accepting SSH connections
+#### Scenario: NodePort is exposed
+- **WHEN** the Soft Serve Service is created
+- **THEN** it uses type `NodePort` mapping port 22 to a static node port (e.g., 30022)
+
+### Requirement: Initial Admin Bootstrapping
+The system SHALL inject the initial administrator's public key via an environment variable.
+
+#### Scenario: Admin key injected
+- **WHEN** the Soft Serve pod starts
+- **THEN** the `SOFT_SERVE_INITIAL_ADMIN_KEYS` environment variable is populated from a SOPS-encrypted Secret
 
 ### Requirement: FIDO2 SSH Authentication
 The system SHALL authenticate SSH users using FIDO2 `sk-ssh-ed25519` public keys configured in the Soft Serve admin settings.
@@ -43,10 +50,3 @@ The system SHALL use a `local-path` PersistentVolumeClaim named `repos` for repo
 #### Scenario: Repositories persist on the volume
 - **WHEN** a user pushes a repository to Soft Serve
 - **THEN** the repository data is stored on the `repos` PVC
-
-### Requirement: HTTP Interface Internal Only
-The system SHALL NOT expose Soft Serve's HTTP interface (port 23232) via Ingress, NodePort, or Tailscale.
-
-#### Scenario: HTTP port is not externally accessible
-- **WHEN** the service is created
-- **THEN** port 23232 is only accessible within the cluster and not exposed through any external endpoint

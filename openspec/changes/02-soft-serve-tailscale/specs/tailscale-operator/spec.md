@@ -23,11 +23,11 @@ The system SHALL inject Tailscale OAuth Client ID and Secret into the HelmReleas
 - **THEN** the `data` or `stringData` fields are encrypted with SOPS
 
 ### Requirement: Tailscale Service Exposure
-The system SHALL expose Soft Serve via a Tailscale IP by configuring the Soft Serve Service as Type `LoadBalancer`, which the Tailscale Operator provisions as a Tailscale service.
+The system SHALL expose Soft Serve via a Tailscale IP by reconfiguring the Soft Serve Service as Type `LoadBalancer`, removing the previous `NodePort` configuration.
 
-#### Scenario: Soft Serve gets a Tailscale IP
-- **WHEN** the Soft Serve Service of type LoadBalancer is created
-- **THEN** the Tailscale Operator assigns a dedicated Tailscale IP to the service
+#### Scenario: Soft Serve Service is modified
+- **WHEN** the updated soft-serve resources are applied
+- **THEN** the Service type is `LoadBalancer` and the Tailscale Operator assigns a dedicated Tailscale IP to the service
 
 #### Scenario: SSH is accessible via Tailscale IP
 - **WHEN** a user on the tailnet connects to the Tailscale IP on port 22
