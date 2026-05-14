@@ -19,4 +19,5 @@ spec:
       valuesKey: values.yaml
   values:
     proxyConfig:
-      tags: "tag:rammus-k8s"
+      tags:
+        - tag:rammus-k8s
