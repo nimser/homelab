@@ -23,7 +23,7 @@
 
 - [x] 4.1 Apply changes and wait for FluxCD reconciliation *(manual)*
 - [x] 4.2 Retrieve the Tailscale IP assigned to the Soft Serve LoadBalancer service *(manual)*
-- [ ] 4.3 Update Cloudflare DNS A record to create `ss.tn.nwo.pm` pointing to the Tailscale IP *(manual)*
-- [ ] 4.4 Update local `~/.ssh/config` to route `ss.tn.nwo.pm` to port 22 *(manual)*
-- [ ] 4.5 Update Gopass remotes to use `ssh://ss.tn.nwo.pm/gopass.git` and verify sync works *(manual)*
+- [x] 4.3 Update Cloudflare DNS A record to create `ss.tn.nwo.pm` pointing to the Tailscale IP *(manual)*
+- [x] 4.4 Update local `~/.ssh/config` to route `ss.tn.nwo.pm` to port 22 *(manual)*
+- [x] 4.5 Update Gopass remotes to use `ssh://ss.tn.nwo.pm/gopass.git` and verify sync works *(manual)*
 - [x] 4.6 Update the repository `README.md` to reflect the transition from LAN access to Tailscale zero-trust access

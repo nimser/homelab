@@ -20,17 +20,6 @@ Accessible via Tailscale zero-trust network.
 - Tailscale client installed and connected to the tailnet
 - Appropriate ACL tags configured for access
 
-#### SSH Config
-
-Add to `~/.ssh/config`:
-
-```
-Host ss.tn.nwo.pm
-  Port 22
-  IdentityAgent ~/.ssh-agent
-  IdentitiesOnly yes
-```
-
 #### Gopass Remote
 
 ```bash
