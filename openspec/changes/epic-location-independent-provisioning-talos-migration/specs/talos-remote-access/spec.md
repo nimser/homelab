@@ -17,3 +17,10 @@ The system SHALL include a Tailscale auth key in the Talos machine config (store
 #### Scenario: Node joins Tailscale network on boot
 - **WHEN** a Talos node boots with the Tailscale extension configured
 - **THEN** the node SHALL automatically join the Tailscale network without manual intervention
+
+### Requirement: ExtensionServiceConfig for Extension Configuration
+The system SHALL configure the Tailscale extension using the `ExtensionServiceConfig` resource API (as required by Talos v1.13+), securely injecting the `TS_AUTHKEY` environment variable.
+
+#### Scenario: Configuring the Tailscale Extension
+- **WHEN** the Tailscale extension patch is applied
+- **THEN** it SHALL create an `ExtensionServiceConfig` that passes the SOPS-decrypted `TS_AUTHKEY` to the extension environment securely.
