@@ -128,7 +128,9 @@ bootstrap_k8s() {
 
   # Remove control-plane taint for single-node scheduling
   # Must be done before Flux bootstrap so pods can schedule
-  kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule- 2>/dev/null || true
+  local node_name
+  node_name=$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')
+  kubectl taint nodes "${node_name}" node-role.kubernetes.io/control-plane:NoSchedule- || true
 }
 
 bootstrap_flux() {
