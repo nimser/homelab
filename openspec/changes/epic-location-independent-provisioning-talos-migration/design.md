@@ -34,10 +34,11 @@ The `cluster-restructure` change (already committed) performed the git-level ren
 - Enables `talosctl` access from anywhere in the world
 - Alternative (VPN/port-forwarding) would require home network access
 
-**3. k3s (not k8s) on Talos**
-- Staying with k3s to maintain compatibility with existing manifests
-- Talos supports k3s as a container runtime option
-- Minimizes migration risk by keeping the same k8s distribution
+**3. Standard Kubernetes on Talos (not k3s)**
+- Talos runs standard Kubernetes as system containers, managed by the Talos API
+- This is the native Talos approach - no separate k3s installation needed
+- Better compatibility with cloud providers (Hetzner uses standard k8s)
+- Reduces complexity: one less component to manage
 
 **4. Machine config structure**
 - Each node gets its own machine config YAML in git (`talos/rammus/controlplane.yaml`, `talos/karma/controlplane.yaml`)
