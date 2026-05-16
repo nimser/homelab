@@ -27,12 +27,13 @@
 - [ ] 4.2 Configure iPXE to offer recovery boot option in menu
 - [ ] 4.3 Test recovery boot on a spare ThinkPad
 
-## 5. ThinkPad BIOS Configuration
+## 5. Remote Power Management (Shelly + WoL)
 
-- [ ] 5.1 Document BIOS settings (PXE OpROM enable, boot order, power-on-after-AC)
-- [ ] 5.2 Configure BIOS on rammus ThinkPad
-- [ ] 5.3 Configure BIOS on karma ThinkPad
-- [ ] 5.4 Configure BIOS on all 5 spare ThinkPads
+- [ ] 5.1 Document BIOS settings (PXE OpROM enable, boot order, Wake-on-LAN)
+- [ ] 5.2 Configure BIOS on all ThinkPads (ensure WoL is enabled, battery installed)
+- [ ] 5.3 Configure Odroid C2 to send Wake-on-LAN packets (e.g. `wakeonlan` or `etherwake`)
+- [ ] 5.4 Test `talosctl reboot` via Tailscale
+- [ ] 5.5 Test hard power cycle: cut Shelly power, let battery die, restore power, send WoL from Odroid C2
 
 ## 6. Testing
 

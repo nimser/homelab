@@ -39,7 +39,14 @@ The user has 5 spare ThinkPad T440ps at their parents' home. When the active ram
 - Menu option: Recovery Linux with Tailscale
 - Recovery Linux is a minimal Alpine/Debian with Tailscale pre-configured for remote SSH access
 
-**5. MAC address registry in git**
+**5. Remote Power Management Strategy (Shelly + WoL)**
+- ThinkPad BIOS "Power On with AC attach" requires a battery to function, but a battery prevents immediate hard power-off via Shelly smart plugs.
+- **Strategy**: Keep the battery installed.
+- **Graceful Reboot**: Use `talosctl reboot` over Tailscale when k8s hangs but Talos API is alive.
+- **Hard Power Cycle**: Turn off the Shelly plug and wait for the battery to fully deplete to force a hard shutdown.
+- **Power On**: Once power is restored via Shelly, the Odroid C2 sends a Wake-on-LAN (WoL) magic packet to turn the ThinkPad back on, triggering a PXE boot sequence.
+
+**6. MAC address registry in git**
 - All ThinkPad MAC addresses mapped to rammus/karma roles in version-controlled config
 - Parents label each spare ThinkPad with "RAMMUS" or "KARMA"
 - When a pre-registered MAC PXE-boots, it auto-provisions without menu interaction
