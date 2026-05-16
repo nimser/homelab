@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Provision a Talos node and bootstrap FluxCD for the karma cluster.
-# Usage: ./scripts/provision-karma.sh <node-ip>
+# Provision a Talos node and bootstrap FluxCD for a cluster.
+# Usage: ./scripts/provision-node.sh <cluster-name> <node-ip>
 #
 # Prerequisites:
 #   - talosctl installed
@@ -10,14 +10,15 @@ set -euo pipefail
 #   - gh CLI authenticated to GitHub
 #   - Node booted from Talos ISO and reachable at <node-ip>
 
-NODE_IP="${1:?Usage: $0 <node-ip>}"
-CLUSTER_NAME="karma"
+CLUSTER_NAME="${1:?Usage: $0 <cluster-name> <node-ip>}"
+NODE_IP="${2:?Usage: $0 <cluster-name> <node-ip>}"
+
 K8S_VERSION="v1.32.4"
 TALOS_VERSION="v1.13.2"
 REPO_OWNER="nimser"
 REPO_NAME="homelab"
 REPO_BRANCH="main"
-CLUSTER_PATH="clusters/karma"
+CLUSTER_PATH="clusters/${CLUSTER_NAME}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -71,10 +72,35 @@ apply_config() {
   local config_dir="$1"
   local config_file="${config_dir}/controlplane.yaml"
 
+  info "Preparing Talos patches..."
+  local patch_flags=("--config-patch" "@$(dirname "$0")/../talos/patches/network.yaml")
+
+  local ts_patch
+  if ts_patch=$(sops -d "$(dirname "$0")/../talos/patches/tailscale.sops.yaml" 2>/dev/null); then
+    local ts_tmp
+    ts_tmp=$(mktemp)
+    echo "$ts_patch" > "$ts_tmp"
+    patch_flags+=("--config-patch" "@${ts_tmp}")
+    info "Included Tailscale patch"
+  else
+    warn "Could not decrypt tailscale.sops.yaml. Ensure SOPS age key is available."
+  fi
+
+  local age_patch
+  if age_patch=$(sops -d "$(dirname "$0")/../talos/patches/sops-age.sops.yaml" 2>/dev/null); then
+    local age_tmp
+    age_tmp=$(mktemp)
+    echo "$age_patch" > "$age_tmp"
+    patch_flags+=("--config-patch" "@${age_tmp}")
+    info "Included SOPS age key patch"
+  else
+    warn "Could not decrypt sops-age.sops.yaml. Ensure SOPS age key is available."
+  fi
+
   info "Applying Talos configuration..."
   talosctl apply-config --insecure --nodes "${NODE_IP}" \
     --file "${config_file}" \
-    --config-patch @"$(dirname "$0")/../talos/patches/network.yaml"
+    "${patch_flags[@]}"
 
   info "Configuration applied, waiting for node to reboot..."
   sleep 30
@@ -112,7 +138,7 @@ bootstrap_k8s() {
   sleep 30
 
   # Get kubeconfig
-  local kubeconfig="/tmp/karma-kubeconfig"
+  local kubeconfig="/tmp/${CLUSTER_NAME}-kubeconfig"
   talosctl --talosconfig "${talosconfig}" kubeconfig "${kubeconfig}" --force >/dev/null
   export KUBECONFIG="${kubeconfig}"
 
@@ -128,7 +154,7 @@ bootstrap_k8s() {
 }
 
 bootstrap_flux() {
-  export KUBECONFIG="/tmp/karma-kubeconfig"
+  export KUBECONFIG="/tmp/${CLUSTER_NAME}-kubeconfig"
 
   info "Bootstrapping FluxCD..."
   export GITHUB_TOKEN=$(gh auth token)
@@ -183,7 +209,7 @@ bootstrap_flux() {
 }
 
 show_status() {
-  export KUBECONFIG="/tmp/karma-kubeconfig"
+  export KUBECONFIG="/tmp/${CLUSTER_NAME}-kubeconfig"
 
   echo ""
   info "=== Cluster Status ==="
@@ -211,8 +237,8 @@ main() {
   bootstrap_flux
   show_status
 
-  info "Karma cluster provisioning complete!"
-  info "Kubeconfig: /tmp/karma-kubeconfig"
+  info "${CLUSTER_NAME} cluster provisioning complete!"
+  info "Kubeconfig: /tmp/${CLUSTER_NAME}-kubeconfig"
   info "Talos config: ${config_dir}/talosconfig"
 }
 

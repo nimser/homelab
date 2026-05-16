@@ -23,14 +23,16 @@ Single-node cluster dedicated to running RustFS as a backup storage target.
 - **Apps**: `apps/karma`
 - **Infrastructure**: `infrastructure/configs/karma`
 
-#### Manual Provisioning
+#### Provisioning
 
-The karma host requires manual setup:
+The karma host is provisioned using Talos Linux:
 
-1. Install base OS (Debian/Ubuntu) on the physical host
-2. Install k3s: `curl -sfL https://get.k3s.io | sh -`
-3. Retrieve kubeconfig from `/etc/rancher/k3s/k3s.yaml` on the node
-4. Bootstrap Flux: `flux bootstrap github --owner=<owner> --repository=homelab --branch=main --path=clusters/karma`
+1. Boot the physical host using the Talos Linux ISO
+2. Run the provisioning script from the repository root:
+   ```bash
+   ./scripts/provision-karma.sh
+   ```
+   This script will apply the machine config, bootstrap Kubernetes, and install FluxCD.
 
 ## Applications
 
@@ -83,3 +85,32 @@ Rust-based file storage service for backup targets.
 - **Secrets**: SOPS + Age encryption
 - **Storage**: local-path provisioner
 - **Networking**: Tailscale zero-trust network for service exposure
+
+## Node Management (Talos)
+
+Both `rammus` and `karma` nodes are managed using Talos Linux.
+
+### Remote Access via Tailscale
+
+Nodes are accessible via their Tailscale IP addresses at the OS level (independent of Kubernetes health).
+Ensure you have the Tailscale client connected and use `talosctl` targeting the node's Tailscale IP.
+
+### Common `talosctl` Commands
+
+```bash
+# Retrieve node status and health
+talosctl --nodes <NODE_IP> get machineconfig
+talosctl --nodes <NODE_IP> health --wait=false
+
+# View system logs
+talosctl --nodes <NODE_IP> logs
+
+# View Kubernetes logs directly from the node
+talosctl --nodes <NODE_IP> containers -k
+
+# Upgrade Talos OS
+talosctl --nodes <NODE_IP> upgrade --image ghcr.io/siderolabs/installer:v1.9.5
+
+# Upgrade Kubernetes
+talosctl --nodes <NODE_IP> upgrade-k8s --to 1.32.4
+```
