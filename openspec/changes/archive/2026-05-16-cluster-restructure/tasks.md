@@ -31,6 +31,6 @@
 
 ## 5. Verification and Documentation
 
-- [ ] 5.1 Verify Flux reconciles the `rammus` cluster successfully after the rename
+- [x] 5.1 Verify Flux reconciles the `rammus` cluster successfully after the rename
 - [x] 5.2 ~~Verify Flux reconciles the `karma` cluster and RustFS is deployed~~ → handled by `epic-location-independent-provisioning-talos-migration`
 - [x] 5.3 Update the root `README.md` to document the new dual-cluster architecture, explaining the distinct purposes of `rammus` (apps) and `karma` (storage/backups), along with manual provisioning instructions.
