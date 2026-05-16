@@ -18,9 +18,10 @@ We are separating concerns by moving backup storage (RustFS) to its own isolated
 **Decision:** Maintain parallel folders in `clusters/` and `apps/` for each cluster.
 **Rationale:** Standard GitOps practice. `clusters/rammus` and `clusters/karma` will define what applications and infrastructure run on each respective cluster.
 
-### 2. Manual Host Provisioning
-**Decision:** The OS (Debian/Ubuntu) and k3s will be installed manually on the physical `karma` host, rather than via automated IaC tools (e.g., Ansible).
-**Rationale:** Simplifies this specific architecture transition without requiring a heavy upfront investment in automation tools for a single node.
+### 2. Karma Host Provisioning (Superseded)
+
+**Decision:** ~~The OS (Debian/Ubuntu) and k3s will be installed manually on the physical `karma` host.~~ → **Superseded.** Karma will be provisioned with Talos Linux instead, handled by the `epic-location-independent-provisioning-talos-migration` change. The repository scaffold (folder structure, Flux paths, RustFS manifests) from this change remains valid and will be used by the Talos provisioning flow.
+**Rationale:** Talos provides immutable, declarative provisioning that aligns with the location-independent homelab vision. Manual Debian/k3s provisioning would create work that's immediately undone by the Talos migration.
 
 ### 3. Centralized Architecture Documentation
 **Decision:** Maintain the source of truth for homelab architecture, cluster layout, and app mapping entirely within the main repository `README.md`.

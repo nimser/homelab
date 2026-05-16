@@ -34,12 +34,13 @@
 
 ## 4. Production Migration (karma)
 
-- [ ] 4.1 Backup RustFS data
-- [ ] 4.2 Install Talos on karma T440p
-- [ ] 4.3 Apply karma machine config via `talosctl apply-config`
-- [ ] 4.4 Bootstrap k3s and FluxCD on karma
-- [ ] 4.5 Verify RustFS is running and accessible
-- [ ] 4.6 Restore RustFS data from backup
+> Note: karma is not yet running — this is a fresh install, no backup/restore needed.
+
+- [ ] 4.1 Install Talos on karma T440p
+- [ ] 4.2 Apply karma machine config via `talosctl apply-config`
+- [ ] 4.3 Bootstrap k3s and FluxCD on karma
+- [ ] 4.4 Verify RustFS is running and accessible
+- [ ] 4.5 Verify Flux reconciles all karma manifests (from `clusters/karma/`, `apps/karma/`)
 
 ## 5. Cleanup and Documentation
 

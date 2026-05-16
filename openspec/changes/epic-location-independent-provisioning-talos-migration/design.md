@@ -2,6 +2,8 @@
 
 The homelab runs two single-node k3s clusters (rammus = apps, karma = storage) on ThinkPad T440p hardware at the user's parents' home. Currently running Debian/Ubuntu with manual OS provisioning. The user travels full-time in a motorhome and needs remote management and disaster recovery capabilities. Talos Linux is the chosen OS because it provides immutable, API-managed infrastructure with declarative machine configs that can provision any hardware identically.
 
+The `cluster-restructure` change (already committed) performed the git-level rename from `staging` → `rammus` and scaffolded the `karma` cluster directory structure. This change handles the OS-level migration.
+
 ## Goals / Non-Goals
 
 **Goals:**
