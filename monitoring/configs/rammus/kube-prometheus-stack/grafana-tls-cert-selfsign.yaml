@@ -8,16 +8,16 @@ metadata:
 type: kubernetes.io/tls
 sops:
     age:
-        - recipient: age1njw3753qrva6ezyupp73xnq004f7p5t7cak63k2rs99ghqmsqswqh6n60x
-          enc: |
+        - enc: |
             -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBiL0RkcnI4QVExek5uQk9P
-            djNmTU1WNTlXelQ1enB5ZTdKb3k1R2VFSGtvCmVwRVNHb2wrUVlBQ3dEa1Evc2pF
-            M3dhc1VjSUJFWklhdThRZmtRLzl5emcKLS0tIGlGZU1vQnV4bFM4NHVSeTFBbm5w
-            eHp0UnVLM1ZWT00zbmpycUdDMVNDakUKj/LGBbd5ij31An7qiMDe/gxlxAYWFSEn
-            MoJafcGLCFMQtGS7xfWGws46khhA3RCoGw18h8ET/CuAwxdeL7pIPg==
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA0T3ZyckFOSjJzaThMNEps
+            WFIrbVFhcVlHUFk2bWliT1pmVnpXK2VpM2dFCjd0WmVnL2lNcVNzSk1vdG1wS2xp
+            V2RmM1o0dmZ2UGZNUjBLT2Y2dXdFWEUKLS0tIEFIdnRrUDVNV2MwWnhpZEVONkZV
+            SWQ4cGhxNTJzTXNvNVFWVmpKV0IzelkK+sLqOk5rYvrDMgRLEQua9tS/A8+XpXXK
+            faNQQhafquTxQ12mBUJeJeZA9dg5jFxm4Mx4Zhpbd4N293NLw6AHqg==
             -----END AGE ENCRYPTED FILE-----
+          recipient: age1s4h6ju3m07pmxq396xe9c48fgzq4lk85gm9mhsdlytgmhtevqpjqj57fuw
+    encrypted_regex: ^(data|stringData)$
     lastmodified: "2025-10-20T21:43:05Z"
     mac: ENC[AES256_GCM,data:bmZ6wTDG2GWKKA5JLLM//EElMQgKfrzIQ/S1UZz40oq9ttVTl1AWXRPjWZ0IMdQIKKbCnS5vt2BqN57yngLkCEaMxPj79kaHMNu318DFtUAAFsI8dEkTgvjJ1aXVtRbpwqgGkQw8phFgTQO7EN+yxfccRI7usYLqc1+Q1Fy2ecY=,iv:xOmqd4f0wY2E75pS6HGJzsu/opSFw80qSP6zCrSXLhE=,tag:KSlqOk+VL8UTq9skNeZAsQ==,type:str]
-    encrypted_regex: ^(data|stringData)$
     version: 3.11.0

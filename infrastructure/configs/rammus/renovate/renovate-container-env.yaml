@@ -6,16 +6,16 @@ metadata:
     name: renovate-container-env
 sops:
     age:
-        - recipient: age1njw3753qrva6ezyupp73xnq004f7p5t7cak63k2rs99ghqmsqswqh6n60x
-          enc: |
+        - enc: |
             -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBqM3hIKzdiNis2cDJFS0RG
-            TEpla3l3QnJXRmRvLzRkc2xyZG9XQjlGWVIwCldKVm9zbUJpSDBxd3NCcGVDZnhD
-            VWpkUzJHYyt0Q0FqeWlGbEdDemVvaE0KLS0tIHdNdVdlSnM1VHdIdjY2Q29aTXFL
-            K2xtTFJLejQxTEZkR0lhU3lEZFZEYWMKuc0wkJlKXww1glg/izw1wXcLlPdyWEQT
-            IgJ/3KM/NQRkgYFk+id69DL4CuSOOPjlXFqAUSVb2pk3F3nejK/ioA==
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBzc3hTWUU4MjQ1Y0xaUDVM
+            OFZaNnd6WmRnREM0YmtDZUMxUFVXay8wZVh3CnhQMk5QZ1NtZ3BoQ0JKaXVBTW9P
+            Y2FvV1pEUWNtb21zdXBCa210UTNONzQKLS0tIDBHeEdKNGI1VjI2eTRaT3NTdE1w
+            TzEzaUx6dXBIWXRKMkpMNWY3b3c1eFUKEo3jmOIwIDlJ9Ih3rbiCTQ5bDD4eStMb
+            HCQNtVL9pBwge1iXVgmjv06n2vdXCeiNb/t/HJoaCrXh7qolEZkCIQ==
             -----END AGE ENCRYPTED FILE-----
+          recipient: age1s4h6ju3m07pmxq396xe9c48fgzq4lk85gm9mhsdlytgmhtevqpjqj57fuw
+    encrypted_regex: ^(data|stringData)$
     lastmodified: "2025-11-25T01:33:32Z"
     mac: ENC[AES256_GCM,data:/fUNlrY7apN19XPbmI4gsoeL+0GL/Pzyh+ANcQ5fy6KiTuzuIHKPz1STF2Vue3Wuq2uBRBZgoRc1hBwpQfjKxAvPZKmx6N700b5i2K6suOr7Zgx37VmdbtpPzRjLqdS2Sv/Xhqa9u4Q4Vck/pmdFWZ3Fm+bVQev7lzfvOUBSXRw=,iv:lvk5NB7tp7zdqfS2r04AHwvXprNZIsC3pnrzN5LcvoM=,tag:qP3+YkwAZBZ1EOv+XmF7sw==,type:str]
-    encrypted_regex: ^(data|stringData)$
     version: 3.11.0

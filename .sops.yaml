@@ -2,10 +2,10 @@ creation_rules:
   - path_regex: talos/.*\.sops\.yaml
     key_groups:
     - age:
-      - age1njw3753qrva6ezyupp73xnq004f7p5t7cak63k2rs99ghqmsqswqh6n60x
+      - age1s4h6ju3m07pmxq396xe9c48fgzq4lk85gm9mhsdlytgmhtevqpjqj57fuw
     encrypted_regex: ^(contents|content|TS_AUTHKEY)$
   - path_regex: .*.yaml
     key_groups:
     - age:
-      - age1njw3753qrva6ezyupp73xnq004f7p5t7cak63k2rs99ghqmsqswqh6n60x
+      - age1s4h6ju3m07pmxq396xe9c48fgzq4lk85gm9mhsdlytgmhtevqpjqj57fuw
     encrypted_regex: ^(data|stringData)$

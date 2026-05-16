@@ -8,16 +8,16 @@ data:
     ssh_host_ed25519_key: ENC[AES256_GCM,data:sol+J7sa+5dZtE/2vH3BM2smUCDLh/JtSAEBh3BwPw0nLveKg776yHbQk9lYKlC18cLhjv5VXjqfaxht82C4g8LeoFJZqzw4yp0UTwknwwbf6tr5ZvNqk1Puz36qyH8/OSrbU4I93qPLPd0QdV0IKP/gGgQ0Vqq0gV7PNYn9WkPFwPiga2QOactmfZfdFXlRj21ZWHPd1H4mf289UqSOtgLlv83vlsjpw1TI0LBa2kxXPq9qZChWnqmUBZKwhjlfqpw50G2bdrZbFfcKhTSpiKFhhcuIk3Jcs3gadbb6gORjw3LVBxY2lu/5YJAWo6YvLcZHkXpG38CiHpNX1wtYBDDS0Zqt9+KRxIlXGQWpUslFqS6ZLsVTNPNeKmLUCj/6JrB1DDT4Inj5k6k4ZHFkUT9qkNcFJrMLiB3uI1Eu5Bj24VhLGCRvnSkCvug6Ugtkj2qF93QzSaidNzMq7mJwrJVz2sKfpEJQ89UqxQ/ypt6rhDQWc48DaQc2u57+QllVXP75Wm4pDHgujSZswrhGLX9Vwoz8/es1mDPopP6PDn/jly2B9N1Sn4bnVg3jv8sC9HzUwxs5BHvvzb/iTxblzsH9prLzDeyTzgoLBY0TVNW+EGc3Yw/Th88j16Wcdjq9XGTQrRBRVecpZ551h1ncEfeaRpV4UqKfrzDF7jJC9g8C3hCLcklNr311ohOOjIUafW3sAA==,iv:WDmeiRsmYOmdPpLYdt/Vdcv6j6+l2cbTgixyV2sOi0w=,tag:07GpEYihLSI123rL9TIWOg==,type:str]
 sops:
     age:
-        - recipient: age1njw3753qrva6ezyupp73xnq004f7p5t7cak63k2rs99ghqmsqswqh6n60x
-          enc: |
+        - enc: |
             -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBYRmsya2lxd2pibmpJTkdm
-            ci84SHVna1JkWlJ0TW9GdlFDTTV6am5HVEZZCk1sYkdtNHhMNEZvblYvc3Q2RFAx
-            Vzh4ZTQ4VHFxUEY4SUtLRFdEOW42SkEKLS0tIFpWVnJCZWIwbHJYbDM5c1AzMURJ
-            dmxWaWVqeitzaDAwbmVWWnlpdjdwaDAKKf35b3+O2ilzw8N3TcO2Unw9BPJ3u2HI
-            vbjpwzm1g4yHaAK8sczCdQiV/WFM2leVuo7/l0zd0jkmUOdvc32y5A==
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAzdGNHNWNObHdyZzUyVGNs
+            Y0tZU1dtczVjdkhVZ0ZlTTdJMC9xSzJEeWk4CnUwZ2JjRnlKc3NhSXdYV1FnNXB2
+            Zzc5UkVwYzBmODJBSUJOVWM5a09DRUkKLS0tIHBydjljN3lLNG54bCtmdlNjaXlD
+            RTN0OGJlRUhHUHhyVHd3TWlVQVF4ZFUKePZ/0dPPMy1c+h9XNPOaOhMMmfv/2ibn
+            xQ5bin3Z2ukCh58b36p96fIgiOW3UMF//ygiSfFMUA0p9ANdO2Js1g==
             -----END AGE ENCRYPTED FILE-----
+          recipient: age1s4h6ju3m07pmxq396xe9c48fgzq4lk85gm9mhsdlytgmhtevqpjqj57fuw
+    encrypted_regex: ^(data|stringData)$
     lastmodified: "2026-05-14T16:13:35Z"
     mac: ENC[AES256_GCM,data:PTYKqRnp5Y936nQvuoWzTvO3ATiPc5SMvrSZhFq2zmpX5e7Ffm7Yti2SQxXNu4pWD4OACDZ1RZIMHie9hnNwWos5dbyalh2i/1TZdX/mz+pWN/4dYSZdX8GQI6AVbktqNh9EXPKcuFgOAebC3Fzzmw0f4NNKGwwuIwBvgMSuFP4=,iv:vhXtNSEBnM3rQJM2kSQDK5NlJkRTemKrYrKCWz7fhQE=,tag:YniSciJtVVYQa0Bg88T64g==,type:str]
-    encrypted_regex: ^(data|stringData)$
     version: 3.12.2
