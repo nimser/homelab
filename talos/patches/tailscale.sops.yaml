@@ -1,23 +1,40 @@
 machine:
-    env:
-        TS_AUTHKEY: ENC[AES256_GCM,data:J5JCwG/UFePn1eEAoSdCmMrN3TUJxpLVFB7WyhuMBvaPLCLsMSLM5MZUEejsBPRET2+ZOgoUGjmpZ/lXBAo=,iv:LJOuvwks+Ve6SNsCqTJjKFw0Alj7CrmfTphM91ywyzU=,tag:Q+2IveQlTkD4rZIlw1y2Cw==,type:str]
     install:
         extraKernelArgs:
             - net.ifnames=0
-        extensions:
-            - image: ghcr.io/siderolabs/tailscale:1.96.4
 sops:
     age:
         - enc: |
             -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBnYk1YbGRBd2k5akpjdksy
-            am4zOElnd0ZzUHJpYWplbkMwVFpyMUNRd3hrCkpXMVluR3NPdDVjZ0NGb05ZalBG
-            bkxZMG5YMFhBTmM1aEZSMzlaWFJlaXcKLS0tIDFDQXBtZGRhUDYvR2dQRU9GY21E
-            b0o2VjRjQm5Xd29tM1hOckRHUnJyTW8KhfDnhsPaPCtb4xBb46RzdpnjESbWbLUn
-            Zk9rTN6MNzDDW6cVd1V0oXZDAQFQnyXISmZt/4HtkJR9MnYnkHSckA==
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBHVjBOKzBvdWdUVkxKOW45
+            bHJjVXJFbkpJK1VZd2hCSlpPZis5ZnNUckVFCk1oYUVPcnErdEJUN0NtUUVISmw1
+            QnBuak1GRU1SeHZsWEQxM2FSa1hmeE0KLS0tIDBtMGpYN0NiOGhpeTMxUklRTkpq
+            VWhxUzlva1JwSHcvWUtHVjNoMGJlekEKaPnkiLyoJaslNpkGIKA17AT5md9lSCB9
+            W0BzZMMffsI8TVl/Nt73Y0K/3S9FdknQpff9O2IOB0Vuef/L75kV5g==
             -----END AGE ENCRYPTED FILE-----
           recipient: age1s4h6ju3m07pmxq396xe9c48fgzq4lk85gm9mhsdlytgmhtevqpjqj57fuw
-    encrypted_regex: ^(contents|content|TS_AUTHKEY)$
-    lastmodified: "2026-05-16T22:37:40Z"
-    mac: ENC[AES256_GCM,data:J44ijw0GXQLY6PLVbl0OjcOAKMuiDtAZIbt1sq7lYHr4cqe071kY0wLpwhcBEbos/GPxPZxRsf8VkGjThlKGdRZ+xGQLoh8dkSvbbeTDt7igphZ0GO25QE8ksqz1Ty2KjhqE61NxijzUMlHh5rLYfvAv6/qzMijIkOdJL48b1hA=,iv:ZvUA2vSyXYAZjRJf3MQABA0hsXcWW2OpJXK7yvFPEJ0=,tag:cbmBdB89zICBfwQDNE4PMw==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-05-16T22:50:49Z"
+    mac: ENC[AES256_GCM,data:ZluB1mz9cq0r9PYfPzRpoTFYaUtEPxx7fwmQrKvDxuAujyaKSKOdGFPW0+tlP06SLuIiecoTzgGnL9UxSk4voOsbCu+Sj7pqfQSNis00vylj7+b6vy+fGLb8e7p/u+2jaoj8sh/LBYRaCgZv0lnQS8or1cCBu/fECZCuiyd72sk=,iv:6mxrFbOacAr8D8UnkUsse8JBLbAbQAayuYEvyeeVY60=,tag:/HwDo4KG5kdInUW2Lo6SGQ==,type:str]
+    version: 3.13.0
+---
+apiVersion: v1alpha1
+kind: ExtensionServiceConfig
+name: tailscale
+environment:
+    - TS_AUTHKEY=tskey-auth-YOURKEYHERE
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBHVjBOKzBvdWdUVkxKOW45
+            bHJjVXJFbkpJK1VZd2hCSlpPZis5ZnNUckVFCk1oYUVPcnErdEJUN0NtUUVISmw1
+            QnBuak1GRU1SeHZsWEQxM2FSa1hmeE0KLS0tIDBtMGpYN0NiOGhpeTMxUklRTkpq
+            VWhxUzlva1JwSHcvWUtHVjNoMGJlekEKaPnkiLyoJaslNpkGIKA17AT5md9lSCB9
+            W0BzZMMffsI8TVl/Nt73Y0K/3S9FdknQpff9O2IOB0Vuef/L75kV5g==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1s4h6ju3m07pmxq396xe9c48fgzq4lk85gm9mhsdlytgmhtevqpjqj57fuw
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-05-16T22:50:49Z"
+    mac: ENC[AES256_GCM,data:ZluB1mz9cq0r9PYfPzRpoTFYaUtEPxx7fwmQrKvDxuAujyaKSKOdGFPW0+tlP06SLuIiecoTzgGnL9UxSk4voOsbCu+Sj7pqfQSNis00vylj7+b6vy+fGLb8e7p/u+2jaoj8sh/LBYRaCgZv0lnQS8or1cCBu/fECZCuiyd72sk=,iv:6mxrFbOacAr8D8UnkUsse8JBLbAbQAayuYEvyeeVY60=,tag:/HwDo4KG5kdInUW2Lo6SGQ==,type:str]
     version: 3.13.0
