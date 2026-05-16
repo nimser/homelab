@@ -121,11 +121,14 @@ bootstrap_k8s() {
     if kubectl get nodes 2>/dev/null | grep -q "Ready"; then
       info "Node is Ready"
       kubectl get nodes -o wide
-      return 0
+      break
     fi
     sleep 2
   done
-  error "Node did not become Ready in time"
+
+  # Remove control-plane taint for single-node scheduling
+  # Must be done before Flux bootstrap so pods can schedule
+  kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule- 2>/dev/null || true
 }
 
 bootstrap_flux() {
@@ -142,9 +145,6 @@ bootstrap_flux() {
 
   info "Waiting for Flux reconciliation..."
   sleep 30
-
-  # Remove control-plane taint for single-node scheduling
-  kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule- 2>/dev/null || true
 
   info "Waiting for Flux controllers to stabilize..."
   sleep 30
