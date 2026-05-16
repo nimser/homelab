@@ -130,7 +130,11 @@ bootstrap_k8s() {
   # Must be done before Flux bootstrap so pods can schedule
   local node_name
   node_name=$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')
-  kubectl taint nodes "${node_name}" node-role.kubernetes.io/control-plane:NoSchedule- || true
+  if [ -z "${node_name}" ]; then
+    error "Could not determine node name for taint removal"
+  fi
+  kubectl taint nodes "${node_name}" node-role.kubernetes.io/control-plane:NoSchedule-
+  info "Removed control-plane taint from ${node_name}"
 }
 
 bootstrap_flux() {
