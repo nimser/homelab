@@ -125,9 +125,13 @@ bootstrap_k8s() {
     fi
     sleep 2
   done
+}
+
+bootstrap_flux() {
+  export KUBECONFIG="/tmp/karma-kubeconfig"
 
   # Remove control-plane taint for single-node scheduling
-  # Must be done before Flux bootstrap so pods can schedule
+  # Must be done after kubelet registration but before Flux pods schedule
   local node_name
   node_name=$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')
   if [ -z "${node_name}" ]; then
@@ -135,10 +139,6 @@ bootstrap_k8s() {
   fi
   kubectl taint nodes "${node_name}" node-role.kubernetes.io/control-plane:NoSchedule-
   info "Removed control-plane taint from ${node_name}"
-}
-
-bootstrap_flux() {
-  export KUBECONFIG="/tmp/karma-kubeconfig"
 
   info "Bootstrapping FluxCD..."
   export GITHUB_TOKEN=$(gh auth token)
