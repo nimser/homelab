@@ -4,4 +4,6 @@ resources:
 - gotk-components.yaml
 - gotk-sync.yaml
 patches:
-- path: patches/controller-tolerations.yaml
+  - path: ../../../patches/control-plane-tolerations.yaml
+    target:
+      kind: Deployment
