@@ -3,6 +3,17 @@ kind: Kustomization
 resources:
   - local-path-provisioner.yaml
 patches:
-  - path: ../../../patches/control-plane-tolerations.yaml
-    target:
+  - target:
       kind: Deployment
+    patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: any
+      spec:
+        template:
+          spec:
+            tolerations:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+                effect: NoSchedule
