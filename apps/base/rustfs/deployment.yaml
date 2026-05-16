@@ -13,10 +13,6 @@ spec:
       labels:
         app: rustfs
     spec:
-      tolerations:
-        - key: node-role.kubernetes.io/control-plane
-          operator: Exists
-          effect: NoSchedule
       containers:
         - name: rustfs
           image: rustfs/rustfs:latest
