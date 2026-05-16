@@ -130,16 +130,6 @@ bootstrap_k8s() {
 bootstrap_flux() {
   export KUBECONFIG="/tmp/karma-kubeconfig"
 
-  # Remove control-plane taint for single-node scheduling
-  # Must be done after kubelet registration but before Flux pods schedule
-  local node_name
-  node_name=$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')
-  if [ -z "${node_name}" ]; then
-    error "Could not determine node name for taint removal"
-  fi
-  kubectl taint nodes "${node_name}" node-role.kubernetes.io/control-plane:NoSchedule-
-  info "Removed control-plane taint from ${node_name}"
-
   info "Bootstrapping FluxCD..."
   export GITHUB_TOKEN=$(gh auth token)
   flux bootstrap github \
@@ -147,10 +137,20 @@ bootstrap_flux() {
     --repository="${REPO_NAME}" \
     --branch="${REPO_BRANCH}" \
     --path="${CLUSTER_PATH}" \
+    --toleration-keys="node-role.kubernetes.io/control-plane" \
     --personal
 
   info "Waiting for Flux reconciliation..."
   sleep 30
+
+  # Remove control-plane taint for single-node scheduling
+  # Done after Flux bootstrap so the node state is completely stable
+  local node_name
+  node_name=$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')
+  if [ -n "${node_name}" ]; then
+    kubectl taint nodes "${node_name}" node-role.kubernetes.io/control-plane:NoSchedule- 2>/dev/null || true
+    info "Removed control-plane taint from ${node_name}"
+  fi
 
   info "Waiting for Flux controllers to stabilize..."
   sleep 30
