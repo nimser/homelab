@@ -98,7 +98,7 @@ bootstrap_k8s() {
 
   info "Waiting for etcd to be ready..."
   for i in $(seq 1 60); do
-    if talosctl --talosconfig "${talosconfig}" services 2>/dev/null | grep -q "etcd.*Running.*OK"; then
+    if talosctl --talosconfig "${talosconfig}" --nodes "${NODE_IP}" services 2>/dev/null | grep -q "etcd"; then
       info "etcd is healthy"
       break
     fi
