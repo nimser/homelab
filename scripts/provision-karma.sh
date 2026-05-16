@@ -143,14 +143,8 @@ bootstrap_flux() {
   info "Waiting for Flux reconciliation..."
   sleep 30
 
-  # Patch Flux controllers with tolerations for single-node
-  for deploy in helm-controller kustomize-controller notification-controller source-controller; do
-    kubectl patch deployment "${deploy}" -n flux-system --type='json' \
-      -p='[{"op":"add","path":"/spec/template/spec/tolerations","value":[{"key":"node-role.kubernetes.io/control-plane","operator":"Exists","effect":"NoSchedule"}]}]' 2>/dev/null || true
-  done
-
-  # Delete any pending pods that lack tolerations
-  kubectl delete pods -n flux-system --field-selector=status.phase=Pending 2>/dev/null || true
+  # Remove control-plane taint for single-node scheduling
+  kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule- 2>/dev/null || true
 
   info "Waiting for Flux controllers to stabilize..."
   sleep 30
