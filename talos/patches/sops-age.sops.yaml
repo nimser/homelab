@@ -1,0 +1,19 @@
+cluster:
+    inlineManifests:
+        - name: flux-sops-age
+          contents: ENC[AES256_GCM,data:P1ZN+VVPOzUI2PGcLZGrgRD0k359/N5fFnVVP8LxIXfiHZdEnvg0ncZh5puMhwbEBCcZJsjhgvtQ9nz7x8ybf3+BsrgJKoCieBhCrGYRrnoSC0R2AEpwBA00jZgkkkcEzrZbhd1C9P1PDEbNonFjPQjN6pplvGdYkHS6CgAktqcqEluyRY6tl4ChzBqcVW8577LfGIozcpX/AIvTNtkiAkmFVjwqpPyCC0BUv3/7G3VCvAgrl88nJ9QLI6AtfTABUgjnjjfwedk=,iv:wHYfTfc1mllJCJnOfw2ZYQ0jmE2SSMzyjXHYFjumNfs=,tag:068lICnLuGvQpztwf5kSqw==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBjN0crQmFERTVsdFpZZlQr
+            ZVJFM2RCSE9zaDRDblk4c3B1cE5GVVVaWlZBCjBIZ3JHeWlRQS9PMWd3MkpGTjJj
+            VFE5NzJrVm5idXRRK1NJc2o3RmlRWmMKLS0tIEdWT0F4bTRoWU5NRytYcU91R2dE
+            ZkVzQVlBYzJ2cUxMK2xlQndqL244Rm8K4XnO697BOGXaPD+WMal+S2tyDzETl/RY
+            /3IYwIwkJUJaF5jBFLktw4ad395qM66JLK3heXdMOY8Ear6JxPH3tw==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1njw3753qrva6ezyupp73xnq004f7p5t7cak63k2rs99ghqmsqswqh6n60x
+    encrypted_regex: ^(contents|content|TS_AUTHKEY)$
+    lastmodified: "2026-05-16T22:30:49Z"
+    mac: ENC[AES256_GCM,data:Td2NLbPEfrl6vYYUNyOMwWycQrmEiFkfS09oUMQHSiB2DYZu5WzOBaEiSdrGlEps3gYi5xLUoWlDudEJylRwHbPKRE+3y/DhWF4kSokCgrM9VGNJ/DFtt1id8DT/VuKGs2Tm2k2a5NxKH0Zt7eaPvzsW850oGtLoqKBEBX4WjgY=,iv:w22DzVDxdE0x0Og8IQx9mlpwFPr2hIQrkpX5PJ6pOW8=,tag:MpCHz+97TfIPY62MN4PWlA==,type:str]
+    version: 3.13.0

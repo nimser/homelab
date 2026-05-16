@@ -4,8 +4,8 @@
 - [x] 1.2 Create Talos machine config template for rammus (standard k8s, NOT k3s)
 - [x] 1.3 Create Talos machine config template for karma (standard k8s, NOT k3s)
 - [x] 1.4 Create shared network patch (DNS, NTP)
-- [ ] 1.5 Create Tailscale extension patch (template exists but needs auth key integration)
-- [ ] 1.6 Create SOPS/Age key patch (template exists but needs key integration)
+- [x] 1.5 Create Tailscale extension patch (template exists but needs auth key integration)
+- [x] 1.6 Create SOPS/Age key patch (template exists but needs key integration)
 - [x] 1.7 Validate machine configs with `talosctl validate`
 
 ## 2. Test Migration (Staging)
@@ -49,7 +49,7 @@
 
 ## 5. Cleanup and Documentation
 
-- [ ] 5.1 Remove Debian/Ubuntu-specific configurations from git (if any)
+- [x] 5.1 Remove Debian/Ubuntu-specific configurations from git (if any)
 - [x] 5.2 Update README with Talos provisioning instructions (via `provision-karma.sh`)
-- [ ] 5.3 Document `talosctl` common commands for remote management
+- [x] 5.3 Document `talosctl` common commands for remote management
 - [ ] 5.4 Verify automated backup strategy still works on Talos
