@@ -3,7 +3,7 @@ creation_rules:
     key_groups:
     - age:
       - age1s4h6ju3m07pmxq396xe9c48fgzq4lk85gm9mhsdlytgmhtevqpjqj57fuw
-    encrypted_regex: ^(contents|content|TS_AUTHKEY)$
+    encrypted_regex: ^(contents|content|TS_AUTHKEY|environment)$
   - path_regex: .*.yaml
     key_groups:
     - age:
