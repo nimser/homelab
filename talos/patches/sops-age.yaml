@@ -1,0 +1,5 @@
+machine:
+  files:
+    - content: "" # Age private key, set via SOPS before provisioning
+      permissions: 0o600
+      path: /var/lib/flux/sops-age/age.agekey

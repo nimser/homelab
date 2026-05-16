@@ -1,0 +1,11 @@
+machine:
+  network:
+    nameservers:
+      - 1.1.1.1
+      - 1.0.0.1
+      - 8.8.8.8
+  time:
+    disabled: false
+    servers:
+      - time.cloudflare.com
+      - pool.ntp.org
