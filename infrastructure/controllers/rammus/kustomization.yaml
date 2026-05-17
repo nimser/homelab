@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: infrastructure
 resources:
   - cert-manager
+  - local-path-provisioner.yaml
   - renovate
   - tailscale-operator
   - ../base/namespace.yaml
