@@ -1,0 +1,2 @@
+# Ignore encrypted Talos machine configs - they are not Kubernetes resources
+controlplane.sops.yaml
