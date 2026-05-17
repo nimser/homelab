@@ -65,7 +65,7 @@ load_or_generate_config() {
 
   if [ -f "${talosconfig_sops}" ] && [ -f "${controlplane_sops}" ]; then
     info "Loading existing Talos config for ${CLUSTER_NAME}..."
-    sops -d "${talosconfig_sops}" > "${tmpdir}/talosconfig"
+    sops -d "${talosconfig_sops}" | yq '.stringData.talosconfig' > "${tmpdir}/talosconfig"
     sops -d "${controlplane_sops}" > "${tmpdir}/controlplane.yaml"
     info "Reusing existing cluster identity (CA preserved)"
   else
