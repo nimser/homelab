@@ -83,7 +83,11 @@ apply_config() {
   local config_file="${config_dir}/controlplane.yaml"
 
   info "Preparing Talos patches..."
-  local patch_flags=("--config-patch" "@$(dirname "$0")/../talos/patches/network.yaml" "--config-patch" "@${hostname_patch}")
+  local patch_flags=(
+    "--config-patch" "@$(dirname "$0")/../talos/patches/network.yaml"
+    "--config-patch" "@$(dirname "$0")/../talos/patches/podsecurity.yaml"
+    "--config-patch" "@${hostname_patch}"
+  )
 
   local ts_patch
   if ts_patch=$(sops -d "$(dirname "$0")/../talos/patches/tailscale.sops.yaml" 2>/dev/null); then
