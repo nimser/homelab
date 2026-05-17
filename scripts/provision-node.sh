@@ -8,7 +8,14 @@ set -euo pipefail
 #   - talosctl installed
 #   - flux CLI installed
 #   - gh CLI authenticated to GitHub
+#   - sops installed (for talosconfig persistence)
 #   - Node booted from Talos ISO and reachable at <node-ip>
+#
+# Config persistence:
+#   On first provision, the generated talosconfig and machine config are
+#   SOPS-encrypted and stored in clusters/<name>/. Subsequent provisions
+#   reuse these configs, preserving the cluster CA and identity across
+#   hardware swaps and cloud migrations.
 
 CLUSTER_NAME="${1:?Usage: $0 <cluster-name> <node-ip>}"
 NODE_IP="${2:?Usage: $0 <cluster-name> <node-ip>}"
@@ -20,6 +27,9 @@ REPO_NAME="homelab"
 REPO_BRANCH="main"
 CLUSTER_PATH="clusters/${CLUSTER_NAME}"
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CLUSTER_DIR="${SCRIPT_DIR}/../${CLUSTER_PATH}"
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -30,7 +40,7 @@ warn()  { echo -e "${YELLOW}[WARN]${NC}  $*" >&2; }
 error() { echo -e "${RED}[ERROR]${NC} $*" >&2; exit 1; }
 
 check_deps() {
-  for cmd in talosctl flux gh kubectl; do
+  for cmd in talosctl flux gh kubectl sops; do
     command -v "$cmd" >/dev/null 2>&1 || error "$cmd is required but not installed"
   done
 }
@@ -47,23 +57,55 @@ wait_for_node() {
   error "Node not reachable after 2 minutes"
 }
 
-generate_config() {
+load_or_generate_config() {
+  local talosconfig_sops="${CLUSTER_DIR}/talosconfig.sops.yaml"
+  local controlplane_sops="${CLUSTER_DIR}/controlplane.sops.yaml"
   local tmpdir
   tmpdir=$(mktemp -d)
-  info "Generating Talos machine config..."
 
-  talosctl gen config "${CLUSTER_NAME}" "https://${NODE_IP}:6443" \
-    --output-dir "${tmpdir}" \
-    --with-cluster-discovery=false \
-    --with-docs=false \
-    --with-examples=false \
-    --kubernetes-version "${K8S_VERSION}" \
-    -f >/dev/null 2>&1
+  if [ -f "${talosconfig_sops}" ] && [ -f "${controlplane_sops}" ]; then
+    info "Loading existing Talos config for ${CLUSTER_NAME}..."
+    sops -d "${talosconfig_sops}" > "${tmpdir}/talosconfig"
+    sops -d "${controlplane_sops}" > "${tmpdir}/controlplane.yaml"
+    info "Reusing existing cluster identity (CA preserved)"
+  else
+    info "Generating new Talos machine config..."
 
-  # Remove fields not supported by this Talos version
-  sed -i '/grubUseUKICmdline/d' "${tmpdir}/controlplane.yaml"
-  # Remove the HostnameConfig document (not needed, hostname set via patch)
-  sed -i '/^---$/,/^$/d' "${tmpdir}/controlplane.yaml"
+    talosctl gen config "${CLUSTER_NAME}" "https://${NODE_IP}:6443" \
+      --output-dir "${tmpdir}" \
+      --with-cluster-discovery=false \
+      --with-docs=false \
+      --with-examples=false \
+      --kubernetes-version "${K8S_VERSION}" \
+      -f >/dev/null 2>&1
+
+    # Remove fields not supported by this Talos version
+    sed -i '/grubUseUKICmdline/d' "${tmpdir}/controlplane.yaml"
+    # Remove the HostnameConfig document (not needed, hostname set via patch)
+    sed -i '/^---$/,/^$/d' "${tmpdir}/controlplane.yaml"
+
+    # Encrypt and persist configs for future reuse
+    mkdir -p "${CLUSTER_DIR}"
+
+    sops --encrypt --encrypted-regex '^(data|stringData)$' --input-type yaml --output-type yaml \
+      <(cat <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: talosconfig
+  namespace: flux-system
+type: Opaque
+stringData:
+  talosconfig: |
+$(sed 's/^/    /' "${tmpdir}/talosconfig")
+EOF
+      ) > "${talosconfig_sops}"
+
+    sops --encrypt --encrypted-regex '^(ca:|secret:|token:|key:|crt:)' --input-type yaml --output-type yaml \
+      "${tmpdir}/controlplane.yaml" > "${controlplane_sops}"
+
+    info "Encrypted configs saved to ${CLUSTER_DIR}/"
+  fi
 
   # Inject hostname patch
   local hostname_patch
@@ -84,13 +126,13 @@ apply_config() {
 
   info "Preparing Talos patches..."
   local patch_flags=(
-    "--config-patch" "@$(dirname "$0")/../talos/patches/network.yaml"
-    "--config-patch" "@$(dirname "$0")/../talos/patches/podsecurity.yaml"
+    "--config-patch" "@${SCRIPT_DIR}/../talos/patches/network.yaml"
+    "--config-patch" "@${SCRIPT_DIR}/../talos/patches/podsecurity.yaml"
     "--config-patch" "@${hostname_patch}"
   )
 
   local ts_patch
-  if ts_patch=$(sops -d "$(dirname "$0")/../talos/patches/tailscale.sops.yaml" 2>/dev/null); then
+  if ts_patch=$(sops -d "${SCRIPT_DIR}/../talos/patches/tailscale.sops.yaml" 2>/dev/null); then
     local ts_tmp
     ts_tmp=$(mktemp)
     echo "$ts_patch" > "$ts_tmp"
@@ -101,7 +143,7 @@ apply_config() {
   fi
 
   local age_patch
-  if age_patch=$(sops -d "$(dirname "$0")/../talos/patches/sops-age.sops.yaml" 2>/dev/null); then
+  if age_patch=$(sops -d "${SCRIPT_DIR}/../talos/patches/sops-age.sops.yaml" 2>/dev/null); then
     local age_tmp
     age_tmp=$(mktemp)
     echo "$age_patch" > "$age_tmp"
@@ -196,13 +238,6 @@ bootstrap_flux() {
   info "Waiting for Flux controllers to stabilize..."
   sleep 30
 
-  # Set privileged PodSecurity for local-path-provisioner
-  kubectl label namespace local-path-storage \
-    pod-security.kubernetes.io/enforce=privileged \
-    pod-security.kubernetes.io/audit=privileged \
-    pod-security.kubernetes.io/warn=privileged \
-    --overwrite 2>/dev/null || true
-
   # Force reconciliation
   flux reconcile source git flux-system -n flux-system 2>/dev/null || true
   sleep 60
@@ -236,8 +271,8 @@ show_status() {
   info "=== All Pods ==="
   kubectl get pods -A
   echo ""
-  info "=== RustFS PVC ==="
-  kubectl get pvc -n rustfs 2>/dev/null || warn "RustFS PVC not yet created (waiting for reconciliation)"
+  info "=== PVCs ==="
+  kubectl get pvc -A 2>/dev/null || warn "No PVCs found"
 }
 
 main() {
@@ -245,7 +280,7 @@ main() {
   wait_for_node
 
   local config_result
-  config_result=$(generate_config)
+  config_result=$(load_or_generate_config)
   local config_dir hostname_patch
   config_dir=$(echo "$config_result" | awk '{print $1}')
   hostname_patch=$(echo "$config_result" | awk '{print $2}')
