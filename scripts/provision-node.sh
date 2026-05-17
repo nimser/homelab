@@ -65,15 +65,25 @@ generate_config() {
   # Remove the HostnameConfig document (not needed, hostname set via patch)
   sed -i '/^---$/,/^$/d' "${tmpdir}/controlplane.yaml"
 
-  echo "${tmpdir}"
+  # Inject hostname patch
+  local hostname_patch
+  hostname_patch=$(mktemp)
+  cat > "$hostname_patch" <<EOF
+machine:
+  network:
+    hostname: ${CLUSTER_NAME}
+EOF
+
+  echo "${tmpdir} ${hostname_patch}"
 }
 
 apply_config() {
   local config_dir="$1"
+  local hostname_patch="$2"
   local config_file="${config_dir}/controlplane.yaml"
 
   info "Preparing Talos patches..."
-  local patch_flags=("--config-patch" "@$(dirname "$0")/../talos/patches/network.yaml")
+  local patch_flags=("--config-patch" "@$(dirname "$0")/../talos/patches/network.yaml" "--config-patch" "@${hostname_patch}")
 
   local ts_patch
   if ts_patch=$(sops -d "$(dirname "$0")/../talos/patches/tailscale.sops.yaml" 2>/dev/null); then
@@ -230,10 +240,13 @@ main() {
   check_deps
   wait_for_node
 
-  local config_dir
-  config_dir=$(generate_config)
+  local config_result
+  config_result=$(generate_config)
+  local config_dir hostname_patch
+  config_dir=$(echo "$config_result" | awk '{print $1}')
+  hostname_patch=$(echo "$config_result" | awk '{print $2}')
 
-  apply_config "${config_dir}"
+  apply_config "${config_dir}" "${hostname_patch}"
   bootstrap_k8s "${config_dir}/talosconfig"
   bootstrap_flux
   show_status
