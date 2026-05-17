@@ -296,6 +296,16 @@ main() {
   bootstrap_flux
   show_status
 
+  # Merge talosconfig into ~/.talos/config for easy access
+  # Replaces stale context for this cluster, preserves other contexts (e.g. karma)
+  mkdir -p ~/.talos
+  touch ~/.talos/config
+  chmod 600 ~/.talos/config
+  talosctl config merge "${config_dir}/talosconfig" >/dev/null 2>&1
+  talosctl config endpoint "${NODE_IP}" >/dev/null 2>&1
+  talosctl config node "${NODE_IP}" >/dev/null 2>&1
+  info "Merged talosconfig into ~/.talos/config"
+
   info "${CLUSTER_NAME} cluster provisioning complete!"
   info "Kubeconfig: /tmp/${CLUSTER_NAME}-kubeconfig"
   info "Talos config: ${config_dir}/talosconfig"
