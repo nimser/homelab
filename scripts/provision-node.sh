@@ -87,8 +87,10 @@ load_or_generate_config() {
     # Encrypt and persist configs for future reuse
     mkdir -p "${CLUSTER_DIR}"
 
-    sops --encrypt --encrypted-regex '^(data|stringData)$' --input-type yaml --output-type yaml \
-      <(cat <<EOF
+    # Encrypt talosconfig as a Kubernetes Secret
+    local talosconfig_secret_tmp
+    talosconfig_secret_tmp=$(mktemp)
+    cat > "${talosconfig_secret_tmp}" <<TCEOF
 apiVersion: v1
 kind: Secret
 metadata:
@@ -98,10 +100,14 @@ type: Opaque
 stringData:
   talosconfig: |
 $(sed 's/^/    /' "${tmpdir}/talosconfig")
-EOF
-      ) > "${talosconfig_sops}"
+TCEOF
 
-    sops --encrypt --encrypted-regex '^(ca:|secret:|token:|key:|crt:)' --input-type yaml --output-type yaml \
+    sops --encrypt --encrypted-regex '^(data|stringData)$' --input-type yaml --output-type yaml \
+      "${talosconfig_secret_tmp}" > "${talosconfig_sops}"
+    rm -f "${talosconfig_secret_tmp}"
+
+    # Encrypt entire controlplane.yaml (contains CAs, secrets, tokens throughout)
+    sops --encrypt --encrypted-regex '.*' --input-type yaml --output-type yaml \
       "${tmpdir}/controlplane.yaml" > "${controlplane_sops}"
 
     info "Encrypted configs saved to ${CLUSTER_DIR}/"
