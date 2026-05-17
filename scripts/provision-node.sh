@@ -297,10 +297,13 @@ main() {
   show_status
 
   # Merge talosconfig into ~/.talos/config for easy access
-  # Replaces stale context for this cluster, preserves other contexts (e.g. karma)
+  # Removes stale context for this cluster first, preserves other contexts (e.g. karma)
   mkdir -p ~/.talos
   touch ~/.talos/config
   chmod 600 ~/.talos/config
+  if [ -f ~/.talos/config ]; then
+    yq eval "del(.contexts.\"${CLUSTER_NAME}\")" ~/.talos/config > ~/.talos/config.tmp 2>/dev/null && mv ~/.talos/config.tmp ~/.talos/config
+  fi
   talosctl config merge "${config_dir}/talosconfig" >/dev/null 2>&1
   talosctl config endpoint "${NODE_IP}" >/dev/null 2>&1
   talosctl config node "${NODE_IP}" >/dev/null 2>&1
