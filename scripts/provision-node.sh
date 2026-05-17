@@ -141,6 +141,7 @@ bootstrap_k8s() {
   local kubeconfig="/tmp/${CLUSTER_NAME}-kubeconfig"
   talosctl --talosconfig "${talosconfig}" kubeconfig "${kubeconfig}" --force >/dev/null
   export KUBECONFIG="${kubeconfig}"
+  kubectl config rename-context "admin@${CLUSTER_NAME}" "${CLUSTER_NAME}" >/dev/null 2>&1 || true
 
   # Wait for node to be Ready
   for i in $(seq 1 60); do
