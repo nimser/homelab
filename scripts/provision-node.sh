@@ -89,7 +89,7 @@ load_or_generate_config() {
 
     # Encrypt talosconfig as a Kubernetes Secret
     local talosconfig_secret_tmp
-    talosconfig_secret_tmp=$(mktemp)
+    talosconfig_secret_tmp=$(mktemp --suffix .yaml)
     cat > "${talosconfig_secret_tmp}" <<TCEOF
 apiVersion: v1
 kind: Secret
