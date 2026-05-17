@@ -24,7 +24,7 @@ touch ~/.talos/config
 chmod 600 ~/.talos/config
 
 found=0
-for config_file in clusters/*/talosconfig.sops.yaml; do
+for config_file in talos/*/talosconfig.sops.yaml; do
   if [ -f "$config_file" ]; then
     cluster=$(basename "$(dirname "$config_file")")
     info "Recovering ${cluster} talosconfig..."
