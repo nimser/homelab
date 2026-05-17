@@ -110,7 +110,7 @@ TCEOF
     sops --encrypt --encrypted-regex '.*' --input-type yaml --output-type yaml \
       "${tmpdir}/controlplane.yaml" > "${controlplane_sops}"
 
-    info "Encrypted configs saved to ${CLUSTER_DIR}/"
+    info "Encrypted configs saved to ${TALOS_DIR}/"
   fi
 
   # Inject hostname patch
