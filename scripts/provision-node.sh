@@ -28,7 +28,7 @@ REPO_BRANCH="main"
 CLUSTER_PATH="clusters/${CLUSTER_NAME}"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CLUSTER_DIR="${SCRIPT_DIR}/../${CLUSTER_PATH}"
+TALOS_DIR="${SCRIPT_DIR}/../talos/${CLUSTER_NAME}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -58,8 +58,8 @@ wait_for_node() {
 }
 
 load_or_generate_config() {
-  local talosconfig_sops="${CLUSTER_DIR}/talosconfig.sops.yaml"
-  local controlplane_sops="${CLUSTER_DIR}/controlplane.sops.yaml"
+  local talosconfig_sops="${TALOS_DIR}/talosconfig.sops.yaml"
+  local controlplane_sops="${TALOS_DIR}/controlplane.sops.yaml"
   local tmpdir
   tmpdir=$(mktemp -d)
 
@@ -85,7 +85,7 @@ load_or_generate_config() {
     sed -i '/^---$/,/^$/d' "${tmpdir}/controlplane.yaml"
 
     # Encrypt and persist configs for future reuse
-    mkdir -p "${CLUSTER_DIR}"
+    mkdir -p "${TALOS_DIR}"
 
     # Encrypt talosconfig as a Kubernetes Secret
     local talosconfig_secret_tmp
