@@ -343,16 +343,22 @@ bootstrap_flux() {
 
   # Verify all kustomizations are ready
   info "Verifying reconciliation..."
+  local success=false
   for i in $(seq 1 30); do
     local not_ready
     not_ready=$(kubectl get kustomizations -A -o jsonpath='{range .items[?(@.status.conditions[0].status!="True")]}{.metadata.name}{"\n"}{end}' 2>/dev/null | grep -v '^$' || true)
     if [ -z "${not_ready}" ]; then
       info "All kustomizations reconciled successfully"
+      success=true
       break
     fi
     warn "Waiting for: ${not_ready}"
     sleep 10
   done
+
+  if [ "${success}" = false ]; then
+    error "Flux reconciliation timed out. Unready kustomizations: ${not_ready}"
+  fi
 
   info "Flux reconciliation complete"
 }
