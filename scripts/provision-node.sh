@@ -154,12 +154,9 @@ apply_config() {
   if ts_patch=$(sops -d "${SCRIPT_DIR}/../talos/patches/tailscale.sops.yaml" 2>/dev/null); then
     local ts_tmp
     ts_tmp=$(mktemp)
-    # Inject TS_HOSTNAME into the ExtensionServiceConfig environment array.
-    # After decryption, the environment section looks like:
-    #   environment:
-    #       - TS_AUTHKEY=tskey-auth-...
-    # We append TS_HOSTNAME=cluster-name as a second entry.
-    ts_patch=$(echo "$ts_patch" | sed "/^[[:space:]]*- TS_AUTHKEY=/a\\    - TS_HOSTNAME=${CLUSTER_NAME}")
+    # Inject TS_HOSTNAME into the ExtensionServiceConfig environment array
+    # using yq to safely handle multi-document YAML modifications.
+    ts_patch=$(echo "$ts_patch" | yq "(select(.kind == \"ExtensionServiceConfig\") | .environment) += [\"TS_HOSTNAME=${CLUSTER_NAME}\"]" 2>/dev/null || echo "$ts_patch")
     echo "$ts_patch" > "$ts_tmp"
     patch_flags+=("--config-patch" "@${ts_tmp}")
     info "Included Tailscale patch (hostname: ${CLUSTER_NAME})"
