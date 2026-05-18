@@ -203,27 +203,30 @@ apply_config() {
     "--config-patch" "@${hostname_patch}"
   )
 
-  local ts_patch
-  if ts_patch=$(sops -d "${SCRIPT_DIR}/../talos/patches/tailscale.sops.yaml" 2>/dev/null); then
-    local ts_tmp
+  local ts_tmp
+  local ephemeral_authkey
+  if ephemeral_authkey=$(get_tailscale_authkey); then
+    info "Successfully generated ephemeral Tailscale auth key via OAuth"
     ts_tmp=$(mktemp)
-
-    local ephemeral_authkey
-    if ephemeral_authkey=$(get_tailscale_authkey); then
-      info "Successfully generated ephemeral Tailscale auth key via OAuth"
-      # Replace any existing TS_AUTHKEY and inject TS_HOSTNAME
-      ts_patch=$(echo "$ts_patch" | yq "(select(.kind == \"ExtensionServiceConfig\") | .environment) = ((select(.kind == \"ExtensionServiceConfig\") | .environment | map(select(test(\"^TS_AUTHKEY=\") | not))) + [\"TS_AUTHKEY=${ephemeral_authkey}\", \"TS_HOSTNAME=${CLUSTER_NAME}\"])" 2>/dev/null || echo "$ts_patch")
-    else
-      warn "Failed to generate auth key via OAuth. Falling back to existing TS_AUTHKEY from sops file."
-      # Just inject TS_HOSTNAME
-      ts_patch=$(echo "$ts_patch" | yq "(select(.kind == \"ExtensionServiceConfig\") | .environment) += [\"TS_HOSTNAME=${CLUSTER_NAME}\"]" 2>/dev/null || echo "$ts_patch")
-    fi
-
-    echo "$ts_patch" > "$ts_tmp"
+    
+    # Generate the Tailscale patch dynamically in memory
+    cat > "${ts_tmp}" <<EOF
+machine:
+  install:
+    extraKernelArgs:
+      - net.ifnames=0
+---
+apiVersion: v1alpha1
+kind: ExtensionServiceConfig
+name: tailscale
+environment:
+  - TS_AUTHKEY=${ephemeral_authkey}
+  - TS_HOSTNAME=${CLUSTER_NAME}
+EOF
     patch_flags+=("--config-patch" "@${ts_tmp}")
     info "Included Tailscale patch (hostname: ${CLUSTER_NAME})"
   else
-    warn "Could not decrypt tailscale.sops.yaml. Ensure SOPS age key is available."
+    warn "Failed to generate auth key via OAuth. Tailscale OS extension will NOT be configured."
   fi
 
   local age_patch
