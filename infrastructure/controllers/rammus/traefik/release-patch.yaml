@@ -1,0 +1,17 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: traefik
+spec:
+  values:
+    providers:
+      kubernetesIngress:
+        publishedService:
+          enabled: true
+    service:
+      type: LoadBalancer
+      annotations:
+        tailscale.com/hostname: rammus-traefik
+        tailscale.com/tags: tag:rammus
+      spec:
+        loadBalancerClass: tailscale

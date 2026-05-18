@@ -5,4 +5,5 @@ resources:
   - cert-manager
   - renovate
   - tailscale-operator
+  - traefik
   - ../base/namespace.yaml

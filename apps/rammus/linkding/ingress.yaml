@@ -4,11 +4,15 @@ metadata:
   name: linkding
   namespace: linkding
   annotations:
-    tailscale.com/tags: tag:rammus
+    cert-manager.io/cluster-issuer: "letsencrypt-production"
+    traefik.ingress.kubernetes.io/frontend-entry-points: http,https
+    traefik.ingress.kubernetes.io/redirect-entry-point: https
+    traefik.ingress.kubernetes.io/redirect-permanent: "true"
 spec:
-  ingressClassName: tailscale
+  ingressClassName: traefik
   rules:
-    - http:
+    - host: ld.tn.example.com
+      http:
         paths:
           - backend:
               service:
@@ -19,4 +23,5 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - rammus-linkding.ts.net
+        - ld.tn.example.com
+      secretName: linkding-cert
