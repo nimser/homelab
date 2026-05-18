@@ -12,15 +12,21 @@ We use SOPS and Age for secret management. Environment configuration is stored i
 
 To decrypt and load secrets automatically in your terminal:
 1. Ensure you have your SOPS Age key configured.
-2. Edit or view secrets using `sops`:
+2. Decrypt the environment file so `direnv` can load it:
    ```bash
-   sops .sops.env
+   sops -d .sops.env > .env
    ```
-3. Use `direnv` to automatically load secrets by adding this to your `.envrc`:
+3. Your `.envrc` (tracked in VCS) uses `direnv`'s `dotenv` function to load the decrypted `.env` automatically:
    ```bash
-   eval "$(sops -d .sops.env)"
+   # .envrc
+   dotenv
    export KUBECONFIG=/tmp/rammus-kubeconfig:/tmp/karma-kubeconfig
    ```
+
+To update secrets, edit the encrypted file directly:
+```bash
+sops .sops.env
+```
 
 ### 2. Node Provisioning
 
