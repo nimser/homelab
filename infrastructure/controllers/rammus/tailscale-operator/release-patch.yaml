@@ -1,0 +1,8 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tailscale-operator
+spec:
+  values:
+    operatorConfig:
+      initialTags: "tag:rammus,tag:k8s-operator"

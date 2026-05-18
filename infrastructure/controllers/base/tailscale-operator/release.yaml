@@ -24,4 +24,4 @@ spec:
       targetPath: oauth.clientSecret
   values:
     operatorConfig:
-      initialTags: "tag:rammus,tag:k8s-operator"
+      initialTags: "tag:k8s-operator"
