@@ -138,6 +138,59 @@ EOF
   echo "${tmpdir} ${hostname_patch}"
 }
 
+get_tailscale_authkey() {
+  local oauth_file="${SCRIPT_DIR}/../infrastructure/configs/${CLUSTER_NAME}/tailscale-operator/oauth-credentials.sops.yaml"
+  if [ ! -f "${oauth_file}" ]; then
+    # Fallback to rammus if current cluster doesn't have one
+    oauth_file="${SCRIPT_DIR}/../infrastructure/configs/rammus/tailscale-operator/oauth-credentials.sops.yaml"
+  fi
+
+  if [ -f "${oauth_file}" ]; then
+    local creds
+    if creds=$(sops -d "${oauth_file}" 2>/dev/null); then
+      local client_id client_secret token_response access_token key_response auth_key
+      client_id=$(echo "${creds}" | yq -r '.stringData.client_id' 2>/dev/null)
+      client_secret=$(echo "${creds}" | yq -r '.stringData.client_secret' 2>/dev/null)
+
+      if [ -n "${client_id}" ] && [ -n "${client_secret}" ]; then
+        token_response=$(curl -sf -X POST "https://api.tailscale.com/api/v2/oauth/token" \
+          -d "grant_type=client_credentials" \
+          -d "client_id=${client_id}" \
+          -d "client_secret=${client_secret}" 2>/dev/null)
+        
+        access_token=$(echo "${token_response}" | jq -r '.access_token' 2>/dev/null)
+
+        if [ -n "${access_token}" ] && [ "${access_token}" != "null" ]; then
+          # Request an ephemeral, non-reusable key with the cluster's specific tag
+          key_response=$(curl -sf -X POST "https://api.tailscale.com/api/v2/tailnet/-/keys" \
+            -H "Authorization: Bearer ${access_token}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "capabilities": {
+                "devices": {
+                  "create": {
+                    "reusable": false,
+                    "ephemeral": false,
+                    "preauthorized": true,
+                    "tags": ["tag:'"${CLUSTER_NAME}"'"]
+                  }
+                }
+              },
+              "expirySeconds": 3600
+            }' 2>/dev/null)
+          
+          auth_key=$(echo "${key_response}" | jq -r '.key' 2>/dev/null)
+          if [ -n "${auth_key}" ] && [ "${auth_key}" != "null" ]; then
+            echo "${auth_key}"
+            return 0
+          fi
+        fi
+      fi
+    fi
+  fi
+  return 1
+}
+
 apply_config() {
   local config_dir="$1"
   local hostname_patch="$2"
@@ -154,9 +207,18 @@ apply_config() {
   if ts_patch=$(sops -d "${SCRIPT_DIR}/../talos/patches/tailscale.sops.yaml" 2>/dev/null); then
     local ts_tmp
     ts_tmp=$(mktemp)
-    # Inject TS_HOSTNAME into the ExtensionServiceConfig environment array
-    # using yq to safely handle multi-document YAML modifications.
-    ts_patch=$(echo "$ts_patch" | yq "(select(.kind == \"ExtensionServiceConfig\") | .environment) += [\"TS_HOSTNAME=${CLUSTER_NAME}\"]" 2>/dev/null || echo "$ts_patch")
+
+    local ephemeral_authkey
+    if ephemeral_authkey=$(get_tailscale_authkey); then
+      info "Successfully generated ephemeral Tailscale auth key via OAuth"
+      # Replace any existing TS_AUTHKEY and inject TS_HOSTNAME
+      ts_patch=$(echo "$ts_patch" | yq "(select(.kind == \"ExtensionServiceConfig\") | .environment) = ((select(.kind == \"ExtensionServiceConfig\") | .environment | map(select(test(\"^TS_AUTHKEY=\") | not))) + [\"TS_AUTHKEY=${ephemeral_authkey}\", \"TS_HOSTNAME=${CLUSTER_NAME}\"])" 2>/dev/null || echo "$ts_patch")
+    else
+      warn "Failed to generate auth key via OAuth. Falling back to existing TS_AUTHKEY from sops file."
+      # Just inject TS_HOSTNAME
+      ts_patch=$(echo "$ts_patch" | yq "(select(.kind == \"ExtensionServiceConfig\") | .environment) += [\"TS_HOSTNAME=${CLUSTER_NAME}\"]" 2>/dev/null || echo "$ts_patch")
+    fi
+
     echo "$ts_patch" > "$ts_tmp"
     patch_flags+=("--config-patch" "@${ts_tmp}")
     info "Included Tailscale patch (hostname: ${CLUSTER_NAME})"
