@@ -141,8 +141,7 @@ EOF
 get_tailscale_authkey() {
   local oauth_file="${SCRIPT_DIR}/../infrastructure/configs/${CLUSTER_NAME}/tailscale-operator/oauth-credentials.sops.yaml"
   if [ ! -f "${oauth_file}" ]; then
-    # Fallback to rammus if current cluster doesn't have one
-    oauth_file="${SCRIPT_DIR}/../infrastructure/configs/rammus/tailscale-operator/oauth-credentials.sops.yaml"
+    error "OAuth credentials not found for cluster ${CLUSTER_NAME} at ${oauth_file}. Cannot generate Tailscale auth key."
   fi
 
   if [ -f "${oauth_file}" ]; then
