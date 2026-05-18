@@ -56,10 +56,10 @@ token_response=$(curl -sf -X POST "https://api.tailscale.com/api/v2/oauth/token"
   -d "client_secret=${OAUTH_CLIENT_SECRET}" 2>/dev/null) || \
   error "Failed to get OAuth token"
 
-ACCESS_TOKEN=$(echo "${token_response}" | yq -r '.access_token' 2>/dev/null)
-[ -z "${ACCESS_TOKEN}" ] && error "OAuth response missing access_token"
+ACCESS_TOKEN=$(echo "${token_response}" | jq -r '.access_token' 2>/dev/null)
+[ -z "${ACCESS_TOKEN}" ] || [ "${ACCESS_TOKEN}" = "null" ] && error "OAuth response missing access_token"
 
-info "Token acquired (expires in $(echo "${token_response}" | yq -r '.expires_in' 2>/dev/null)s)"
+info "Token acquired (expires in $(echo "${token_response}" | jq -r '.expires_in' 2>/dev/null)s)"
 
 # --- Fetch machines ---
 # We use the special "-" shorthand for the tailnet name, which automatically
@@ -80,7 +80,7 @@ delete_machine() {
   http_code=$(curl -sf -o /dev/null -w "%{http_code}" \
     -X DELETE \
     -H "Authorization: Bearer ${ACCESS_TOKEN}" \
-    "https://api.tailscale.com/api/v2/tailnet/-/device/${device_id}" \
+    "https://api.tailscale.com/api/v2/device/${device_id}" \
     -H "Content-Type: application/json" 2>/dev/null || true)
 
   if [ "${http_code}" = "200" ]; then
@@ -93,29 +93,35 @@ delete_machine() {
 
 process_machines() {
   local prefix="$1"
-  local machines_json
-  machines_json=$(echo "${machines}" | yq -o json "[.devices[] | select(.name | startswith(\"${prefix}\"))]" 2>/dev/null || echo "[]")
+  local filtered_devices
+  
+  # Filter devices that start with prefix
+  filtered_devices=$(echo "${machines}" | jq -c "[.devices[] | select(.name | startswith(\"${prefix}\"))]" 2>/dev/null || echo "[]")
 
   local count
-  count=$(echo "${machines_json}" | yq 'length' 2>/dev/null || echo "0")
+  count=$(echo "${filtered_devices}" | jq 'length' 2>/dev/null || echo "0")
   [ "${count}" -le 0 ] && info "  No machines matching ${prefix}*" && return
-  [ "${count}" -eq 1 ] && info "  One machine: $(echo "${machines_json}" | yq -r '.[0].name') (keeping)" && return
+  [ "${count}" -eq 1 ] && info "  One machine: $(echo "${filtered_devices}" | jq -r '.[0].name') (keeping)" && return
 
   info "  Found ${count} machines matching ${prefix}*"
 
   local connected_id
-  connected_id=$(echo "${machines_json}" | yq -r '[.devices[] | select(.connected == true) | .id] | .[0]' 2>/dev/null || true)
-  [ -n "${connected_id}" ] && info "  Connected: $(echo "${machines_json}" | yq -r ".devices[] | select(.id == \"${connected_id}\") | .name") (keeping)"
+  connected_id=$(echo "${filtered_devices}" | jq -r '[.[] | select(.connected == true) | .id] | .[0]' 2>/dev/null)
+  [ "${connected_id}" = "null" ] && connected_id=""
 
-  local stale
-  stale=$(echo "${machines_json}" | yq -r '[.devices[] | select(.connected != true) | {id: .id, name: .name}]' 2>/dev/null || echo "[]")
-  local stale_count
-  stale_count=$(echo "${stale}" | yq 'length' 2>/dev/null || echo "0")
-  [ "${stale_count}" -gt 0 ] && for i in $(seq 0 $((stale_count - 1))); do
-    local sid sname
-    sid=$(echo "${stale}" | yq -r ".[${i}].id")
-    sname=$(echo "${stale}" | yq -r ".[${i}].name")
-    [ -n "${sid}" ] && delete_machine "${sid}" "${sname}"
+  if [ -n "${connected_id}" ]; then
+    info "  Connected: $(echo "${filtered_devices}" | jq -r ".[] | select(.id == \"${connected_id}\") | .name") (keeping)"
+  fi
+
+  local stale_ids
+  stale_ids=$(echo "${filtered_devices}" | jq -r ".[] | select(.connected != true) | .id" 2>/dev/null)
+  
+  for sid in $stale_ids; do
+    [ -z "${sid}" ] && continue
+    [ "${sid}" = "${connected_id}" ] && continue
+    local sname
+    sname=$(echo "${filtered_devices}" | jq -r ".[] | select(.id == \"${sid}\") | .name")
+    delete_machine "${sid}" "${sname}"
   done
 }
 
