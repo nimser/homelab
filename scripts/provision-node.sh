@@ -60,22 +60,13 @@ wait_for_node() {
 cleanup_tailscale() {
   info "Cleaning up stale Tailscale machines for ${CLUSTER_NAME}..."
 
-  local ts_tailnet="${TAILSCALE_TAILNET:-}"
-  if [ -z "${ts_tailnet}" ]; then
-    warn "TAILSCALE_TAILNET not set. Skipping Tailscale cleanup."
-    warn "Set TAILSCALE_TAILNET to your tailnet name (e.g., 'example.com' or 'ts-abc123')."
-    return 0
-  fi
-
   local cleanup_script="${SCRIPT_DIR}/cleanup-tailscale.sh"
   if [ ! -x "${cleanup_script}" ]; then
     warn "Cleanup script not found at ${cleanup_script}"
     return 0
   fi
 
-  # Pass TAILSCALE_TAILNET to the cleanup script
-  # The script handles authentication internally (OAuth from SOPS or direct API key)
-  TAILSCALE_TAILNET="${ts_tailnet}" "${cleanup_script}" "${CLUSTER_NAME}" \
+  "${cleanup_script}" "${CLUSTER_NAME}" \
     || warn "Tailscale cleanup failed (continuing anyway)"
 }
 

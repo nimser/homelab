@@ -10,7 +10,6 @@ set -euo pipefail
 # Required OAuth scopes: devices:write (to delete machines)
 #
 # Environment:
-#   TAILSCALE_TAILNET  - Your tailnet name (e.g., "example.com" or "ts-abc123")
 #   TAILSCALE_OAUTH_CLIENT_ID     - OAuth client ID (or auto-extracted from SOPS)
 #   TAILSCALE_OAUTH_CLIENT_SECRET - OAuth client secret (or auto-extracted from SOPS)
 
@@ -26,10 +25,7 @@ info()  { echo -e "${GREEN}[INFO]${NC}  $*" >&2; }
 warn()  { echo -e "${YELLOW}[WARN]${NC}  $*" >&2; }
 error() { echo -e "${RED}[ERROR]${NC} $*" >&2; exit 1; }
 
-TAILNET="${TAILSCALE_TAILNET:-}"
-[ -z "${TAILNET}" ] && error "TAILSCALE_TAILNET not set (e.g., 'example.com' or 'ts-abc123')"
-
-info "Fetching Tailscale machines for tailnet: ${TAILNET}"
+info "Fetching Tailscale machines for tailnet"
 
 # --- Authentication: OAuth only ---
 # Try env vars first, then extract from SOPS
@@ -66,9 +62,11 @@ ACCESS_TOKEN=$(echo "${token_response}" | yq -r '.access_token' 2>/dev/null)
 info "Token acquired (expires in $(echo "${token_response}" | yq -r '.expires_in' 2>/dev/null)s)"
 
 # --- Fetch machines ---
+# We use the special "-" shorthand for the tailnet name, which automatically
+# uses the tailnet associated with the OAuth credentials.
 machines=$(curl -sf \
   -H "Authorization: Bearer ${ACCESS_TOKEN}" \
-  "https://api.tailscale.com/api/v2/tailnet/${TAILNET}/devices" \
+  "https://api.tailscale.com/api/v2/tailnet/-/devices" \
   -H "Content-Type: application/json") || error "Failed to fetch machines"
 
 DELETED_COUNT=0
@@ -82,7 +80,7 @@ delete_machine() {
   http_code=$(curl -sf -o /dev/null -w "%{http_code}" \
     -X DELETE \
     -H "Authorization: Bearer ${ACCESS_TOKEN}" \
-    "https://api.tailscale.com/api/v2/tailnet/${TAILNET}/device/${device_id}" \
+    "https://api.tailscale.com/api/v2/tailnet/-/device/${device_id}" \
     -H "Content-Type: application/json" 2>/dev/null || true)
 
   if [ "${http_code}" = "200" ]; then
