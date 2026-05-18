@@ -39,7 +39,7 @@ Both `rammus` and `karma` nodes are managed using Talos Linux. To provision a no
    ```
    *Note: This script automatically handles Tailscale machine cleanup, Talos machine config generation, Kubernetes bootstrapping, and FluxCD installation.*
 
-For detailed information on Talos administration, recovering cluster access, patching, or network configuration, see the [Talos README](talos/README.md).
+For detailed information on Talos administration, recovering cluster access, patching, or network configuration, see [Talos administration docs](docs/talos.md).
 
 ---
 
