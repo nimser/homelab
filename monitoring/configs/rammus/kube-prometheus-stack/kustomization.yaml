@@ -2,5 +2,5 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: monitoring
 resources:
-  - grafana-credentials.yaml
-  - grafana-tls-cert-selfsign.yaml
+  - grafana-credentials.sops.yaml
+  - grafana-tls-cert-selfsign.sops.yaml
