@@ -5,6 +5,7 @@ metadata:
   namespace: linkding
   annotations:
     tailscale.com/hostname: rammus-linkding
+    tailscale.com/tags: tag:rammus
 spec:
   ingressClassName: tailscale
   rules:
