@@ -5,6 +5,7 @@ metadata:
   namespace: linkding
   annotations:
     tailscale.com/hostname: rammus-ld
+    tailscale.com/proxy-group: default
 spec:
   ingressClassName: tailscale
   rules:

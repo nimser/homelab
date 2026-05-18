@@ -5,6 +5,7 @@ metadata:
   namespace: audiobookshelf
   annotations:
     tailscale.com/hostname: rammus-abs
+    tailscale.com/proxy-group: default
 spec:
   ingressClassName: tailscale
   rules:
