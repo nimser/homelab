@@ -4,7 +4,6 @@ metadata:
   name: audiobookshelf
   namespace: audiobookshelf
   annotations:
-    tailscale.com/hostname: rammus-audiobookshelf
     tailscale.com/tags: tag:rammus
 spec:
   ingressClassName: tailscale
@@ -18,3 +17,6 @@ spec:
                   number: 3005
             path: /
             pathType: Prefix
+  tls:
+    - hosts:
+        - rammus-audiobookshelf.ts.net

@@ -4,7 +4,6 @@ metadata:
   name: linkding
   namespace: linkding
   annotations:
-    tailscale.com/hostname: rammus-linkding
     tailscale.com/tags: tag:rammus
 spec:
   ingressClassName: tailscale
@@ -18,3 +17,6 @@ spec:
                   number: 9090
             path: /
             pathType: Prefix
+  tls:
+    - hosts:
+        - rammus-linkding.ts.net
