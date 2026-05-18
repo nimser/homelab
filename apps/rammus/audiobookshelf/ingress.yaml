@@ -4,7 +4,8 @@ metadata:
   name: audiobookshelf
   namespace: audiobookshelf
   annotations:
-    tailscale.com/hostname: rammus-abs
+    tailscale.com/hostname: rammus-audiobookshelf
+    tailscale.com/tags: tag:rammus
     cert-manager.io/cluster-issuer: "letsencrypt-production"
 spec:
   ingressClassName: tailscale

@@ -4,7 +4,8 @@ metadata:
   name: linkding
   namespace: linkding
   annotations:
-    tailscale.com/hostname: rammus-ld
+    tailscale.com/hostname: rammus-linkding
+    tailscale.com/tags: tag:rammus
     cert-manager.io/cluster-issuer: "letsencrypt-production"
 spec:
   ingressClassName: tailscale
