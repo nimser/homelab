@@ -5,3 +5,15 @@ resources:
   - ../../base/soft-serve/
   - soft-serve-admin-keys.yaml
   - soft-serve-ssh-hostkeys.yaml
+patches:
+  - target:
+      kind: Service
+      name: soft-serve
+    patch: |
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: soft-serve
+        annotations:
+          tailscale.com/tailnet-name: rammus-soft-serve
+          tailscale.com/tags: tag:rammus
