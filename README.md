@@ -6,29 +6,8 @@ GitOps-managed homelab infrastructure using Kubernetes (Talos), FluxCD, and SOPS
 
 When setting up a new dev environment or reprovisioning nodes, you'll need the right secrets and tools.
 
-### 1. Secrets Management (.sops.env & direnv)
 
-We use SOPS and Age for secret management. Environment configuration is stored in a `.env` file (gitignored) and encrypted as `.sops.env` (tracked in VCS).
-
-To decrypt and load secrets automatically in your terminal:
-1. Ensure you have your SOPS Age key configured.
-2. Decrypt the environment file so `direnv` can load it:
-   ```bash
-   sops -d .sops.env > .env
-   ```
-3. Your `.envrc` (tracked in VCS) uses `direnv`'s `dotenv` function to load the decrypted `.env` automatically:
-   ```bash
-   # .envrc
-   dotenv
-   export KUBECONFIG=/tmp/rammus-kubeconfig:/tmp/karma-kubeconfig
-   ```
-
-To update secrets, edit the encrypted file directly:
-```bash
-sops .sops.env
-```
-
-### 2. Node Provisioning
+### Node Provisioning
 
 Both `rammus` and `karma` nodes are managed using Talos Linux. To provision a node:
 
