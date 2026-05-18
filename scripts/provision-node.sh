@@ -183,6 +183,11 @@ get_tailscale_authkey() {
           if [ -n "${auth_key}" ] && [ "${auth_key}" != "null" ]; then
             echo "${auth_key}"
             return 0
+          else
+            # Print the error message to stderr so it doesn't corrupt the auth_key stdout
+            local err_msg
+            err_msg=$(echo "${key_response}" | jq -r '.message' 2>/dev/null)
+            echo "Tailscale API Error: ${err_msg}" >&2
           fi
         fi
       fi
