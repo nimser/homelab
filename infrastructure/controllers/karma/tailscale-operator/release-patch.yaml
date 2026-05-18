@@ -5,6 +5,7 @@ metadata:
 spec:
   values:
     operatorConfig:
+      hostname: karma-tailscale-operator
       defaultTags:
         - tag:karma
         - tag:k8s-operator
