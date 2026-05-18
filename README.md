@@ -2,6 +2,12 @@
 
 GitOps-managed homelab infrastructure using Kubernetes (Talos), FluxCD, and SOPS.
 
+## Design Choices
+
+**Talos Linux** for location-independent provisioning — the same config deploys identically on a home Thinkpad or a cloud VM when home network access is lost. The immutable, declarative OS eliminates manual node management and reduces the attack surface.
+
+**Single-node clusters** with no in-place upgrades — nodes are disposable. When updates or changes are needed, the entire node is reprovisioned from scratch rather than patched in place. This eliminates upgrade drift and ensures every node is always in a known-good state.
+
 ## Getting Started
 
 When setting up a new dev environment or reprovisioning nodes, you'll need the right secrets and tools.
