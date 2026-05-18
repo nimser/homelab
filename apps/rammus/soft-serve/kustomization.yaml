@@ -15,5 +15,5 @@ patches:
       metadata:
         name: soft-serve
         annotations:
-          tailscale.com/tailnet-name: rammus-soft-serve
+          tailscale.com/hostname: rammus-soft-serve
           tailscale.com/tags: tag:rammus
