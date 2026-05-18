@@ -3,4 +3,4 @@ kind: Kustomization
 namespace: infrastructure
 resources:
   - ../../base/cert-manager/
-  - cloudflare-api-token-secret.yaml
+  - cloudflare-api-token-secret.sops.yaml
