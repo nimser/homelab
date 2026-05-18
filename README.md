@@ -1,6 +1,41 @@
 # Homelab
 
-GitOps-managed homelab infrastructure using Kubernetes (k3s), FluxCD, and SOPS.
+GitOps-managed homelab infrastructure using Kubernetes (Talos), FluxCD, and SOPS.
+
+## Getting Started
+
+When setting up a new dev environment or reprovisioning nodes, you'll need the right secrets and tools.
+
+### 1. Secrets Management (.sops.env & direnv)
+
+We use SOPS and Age for secret management. Environment configuration is stored in a `.env` file (gitignored) and encrypted as `.sops.env` (tracked in VCS).
+
+To decrypt and load secrets automatically in your terminal:
+1. Ensure you have your SOPS Age key configured.
+2. Edit or view secrets using `sops`:
+   ```bash
+   sops .sops.env
+   ```
+3. Use `direnv` to automatically load secrets by adding this to your `.envrc`:
+   ```bash
+   eval "$(sops -d .sops.env)"
+   export KUBECONFIG=/tmp/rammus-kubeconfig:/tmp/karma-kubeconfig
+   ```
+
+### 2. Node Provisioning
+
+Both `rammus` and `karma` nodes are managed using Talos Linux. To provision a node:
+
+1. Boot the physical host using the Talos Linux ISO.
+2. Run the unified provisioning script from the repository root:
+   ```bash
+   ./scripts/provision-node.sh <cluster-name> <node-ip>
+   ```
+   *Note: This script automatically handles Tailscale machine cleanup, Talos machine config generation, Kubernetes bootstrapping, and FluxCD installation.*
+
+For detailed information on Talos administration, recovering cluster access, patching, or network configuration, see the [Talos README](talos/README.md).
+
+---
 
 ## Architecture
 
@@ -22,17 +57,6 @@ Single-node cluster dedicated to running RustFS as a backup storage target.
 - **Path**: `clusters/karma`
 - **Apps**: `apps/karma`
 - **Infrastructure**: `infrastructure/configs/karma`
-
-#### Provisioning
-
-The karma host is provisioned using Talos Linux:
-
-1. Boot the physical host using the Talos Linux ISO
-2. Run the provisioning script from the repository root:
-   ```bash
-   ./scripts/provision-karma.sh
-   ```
-   This script will apply the machine config, bootstrap Kubernetes, and install FluxCD.
 
 ## Applications
 
@@ -85,32 +109,3 @@ Rust-based file storage service for backup targets.
 - **Secrets**: SOPS + Age encryption
 - **Storage**: local-path provisioner
 - **Networking**: Tailscale zero-trust network for service exposure
-
-## Node Management (Talos)
-
-Both `rammus` and `karma` nodes are managed using Talos Linux.
-
-### Remote Access via Tailscale
-
-Nodes are accessible via their Tailscale IP addresses at the OS level (independent of Kubernetes health).
-Ensure you have the Tailscale client connected and use `talosctl` targeting the node's Tailscale IP.
-
-### Common `talosctl` Commands
-
-```bash
-# Retrieve node status and health
-talosctl --nodes <NODE_IP> get machineconfig
-talosctl --nodes <NODE_IP> health --wait=false
-
-# View system logs
-talosctl --nodes <NODE_IP> logs
-
-# View Kubernetes logs directly from the node
-talosctl --nodes <NODE_IP> containers -k
-
-# Upgrade Talos OS
-talosctl --nodes <NODE_IP> upgrade --image ghcr.io/siderolabs/installer:v1.9.5
-
-# Upgrade Kubernetes
-talosctl --nodes <NODE_IP> upgrade-k8s --to 1.32.4
-```
