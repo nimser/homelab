@@ -5,12 +5,11 @@ metadata:
   namespace: audiobookshelf
   annotations:
     tailscale.com/hostname: rammus-abs
-    tailscale.com/proxy-group: default
+    cert-manager.io/cluster-issuer: "letsencrypt-production"
 spec:
   ingressClassName: tailscale
   rules:
-    - host: abs.tn.example.com
-      http:
+    - http:
         paths:
           - backend:
               service:
@@ -19,3 +18,7 @@ spec:
                   number: 3005
             path: /
             pathType: Prefix
+  tls:
+    - hosts:
+        - abs.tn.example.com
+      secretName: audiobookshelf-cert

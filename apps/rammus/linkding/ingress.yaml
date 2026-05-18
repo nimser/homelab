@@ -5,12 +5,11 @@ metadata:
   namespace: linkding
   annotations:
     tailscale.com/hostname: rammus-ld
-    tailscale.com/proxy-group: default
+    cert-manager.io/cluster-issuer: "letsencrypt-production"
 spec:
   ingressClassName: tailscale
   rules:
-    - host: ld.tn.example.com
-      http:
+    - http:
         paths:
           - backend:
               service:
@@ -19,3 +18,7 @@ spec:
                   number: 9090
             path: /
             pathType: Prefix
+  tls:
+    - hosts:
+        - ld.tn.example.com
+      secretName: linkding-cert
