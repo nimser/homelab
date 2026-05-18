@@ -97,6 +97,11 @@ load_or_generate_config() {
     # Remove the HostnameConfig document (not needed, hostname set via patch)
     sed -i '/^---$/,/^$/d' "${tmpdir}/controlplane.yaml"
 
+    # Inject the Talos Image Factory installer that contains the Tailscale extension
+    # Schematic ID: 4a0d65c669d46663f377e7161e50cfd570c401f26fd9e7bda34a0216b6f1922b (siderolabs/tailscale)
+    local factory_image="factory.talos.dev/installer/4a0d65c669d46663f377e7161e50cfd570c401f26fd9e7bda34a0216b6f1922b:${TALOS_VERSION}"
+    yq -i ".machine.install.image = \"${factory_image}\"" "${tmpdir}/controlplane.yaml"
+
     # Encrypt and persist configs for future reuse
     mkdir -p "${TALOS_DIR}"
 
@@ -131,6 +136,8 @@ TCEOF
   hostname_patch=$(mktemp)
   cat > "$hostname_patch" <<EOF
 machine:
+  install:
+    image: factory.talos.dev/installer/4a0d65c669d46663f377e7161e50cfd570c401f26fd9e7bda34a0216b6f1922b:${TALOS_VERSION}
   network:
     hostname: ${CLUSTER_NAME}
 EOF
