@@ -33,19 +33,11 @@ OAUTH_CLIENT_ID="${TAILSCALE_OAUTH_CLIENT_ID:-}"
 OAUTH_CLIENT_SECRET="${TAILSCALE_OAUTH_CLIENT_SECRET:-}"
 
 if [ -z "${OAUTH_CLIENT_ID}" ] || [ -z "${OAUTH_CLIENT_SECRET}" ]; then
-  for oauth_file in \
-    "${SCRIPT_DIR}/../infrastructure/configs/${CLUSTER_NAME}/tailscale-operator/oauth-credentials.sops.yaml" \
-    "${SCRIPT_DIR}/../infrastructure/configs/${CLUSTER_NAME}/tailscale-operator/oauth-credentials.yaml" \
-    "${SCRIPT_DIR}/../infrastructure/configs/rammus/tailscale-operator/oauth-credentials.sops.yaml" \
-    "${SCRIPT_DIR}/../infrastructure/configs/rammus/tailscale-operator/oauth-credentials.yaml"; do
-    if [ -f "${oauth_file}" ] && creds=$(sops -d "${oauth_file}" 2>/dev/null); then
-      OAUTH_CLIENT_ID=$(echo "${creds}" | yq -r '.stringData.client_id' 2>/dev/null)
-      OAUTH_CLIENT_SECRET=$(echo "${creds}" | yq -r '.stringData.client_secret' 2>/dev/null)
-      [ -n "${OAUTH_CLIENT_ID}" ] && [ -n "${OAUTH_CLIENT_SECRET}" ] && break
-    fi
-    OAUTH_CLIENT_ID=""
-    OAUTH_CLIENT_SECRET=""
-  done
+  oauth_file="${SCRIPT_DIR}/../infrastructure/configs/${CLUSTER_NAME}/tailscale-operator/oauth-credentials.sops.yaml"
+  if [ -f "${oauth_file}" ] && creds=$(sops -d "${oauth_file}" 2>/dev/null); then
+    OAUTH_CLIENT_ID=$(echo "${creds}" | yq -r '.stringData.client_id' 2>/dev/null)
+    OAUTH_CLIENT_SECRET=$(echo "${creds}" | yq -r '.stringData.client_secret' 2>/dev/null)
+  fi
 fi
 
 [ -z "${OAUTH_CLIENT_ID}" ] || [ -z "${OAUTH_CLIENT_SECRET}" ] && \
