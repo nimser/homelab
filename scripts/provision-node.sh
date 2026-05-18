@@ -162,7 +162,7 @@ get_tailscale_authkey() {
 
         if [ -n "${access_token}" ] && [ "${access_token}" != "null" ]; then
           # Request an ephemeral, non-reusable key with the cluster's specific tag
-          key_response=$(curl -sf -X POST "https://api.tailscale.com/api/v2/tailnet/-/keys" \
+          key_response=$(curl -s -X POST "https://api.tailscale.com/api/v2/tailnet/-/keys" \
             -H "Authorization: Bearer ${access_token}" \
             -H "Content-Type: application/json" \
             -d '{
