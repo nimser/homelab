@@ -24,4 +24,5 @@ spec:
       targetPath: oauth.clientSecret
   values:
     operatorConfig:
-      initialTags: "tag:k8s-operator"
+      defaultTags:
+        - tag:k8s-operator
