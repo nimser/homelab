@@ -309,12 +309,7 @@ main() {
   config_dir=$(echo "$config_result" | awk '{print $1}')
   hostname_patch=$(echo "$config_result" | awk '{print $2}')
 
-  apply_config "${config_dir}" "${hostname_patch}"
-  bootstrap_k8s "${config_dir}/talosconfig"
-  bootstrap_flux
-  show_status
-
-  # Merge talosconfig into ~/.talos/config for easy access
+  # Merge talosconfig into ~/.talos/config immediately so it's not lost if the script fails later
   # Removes stale context for this cluster first, preserves other contexts (e.g. karma)
   mkdir -p ~/.talos
   touch ~/.talos/config
@@ -326,6 +321,11 @@ main() {
   talosctl config endpoint "${NODE_IP}" >/dev/null 2>&1
   talosctl config node "${NODE_IP}" >/dev/null 2>&1
   info "Merged talosconfig into ~/.talos/config"
+
+  apply_config "${config_dir}" "${hostname_patch}"
+  bootstrap_k8s "${config_dir}/talosconfig"
+  bootstrap_flux
+  show_status
 
   info "${CLUSTER_NAME} cluster provisioning complete!"
   info "Kubeconfig: /tmp/${CLUSTER_NAME}-kubeconfig"
