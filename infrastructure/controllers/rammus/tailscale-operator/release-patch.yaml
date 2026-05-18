@@ -5,6 +5,7 @@ metadata:
 spec:
   values:
     operatorConfig:
+      hostname: rammus-tailscale-operator
       defaultTags:
         - tag:rammus
         - tag:k8s-operator
