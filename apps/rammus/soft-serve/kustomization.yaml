@@ -3,8 +3,8 @@ kind: Kustomization
 namespace: soft-serve
 resources:
   - ../../base/soft-serve/
-  - soft-serve-admin-keys.yaml
-  - soft-serve-ssh-hostkeys.yaml
+  - soft-serve-admin-keys.sops.yaml
+  - soft-serve-ssh-hostkeys.sops.yaml
 patches:
   - target:
       kind: Service
