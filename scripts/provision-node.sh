@@ -57,6 +57,28 @@ wait_for_node() {
   error "Node not reachable after 2 minutes"
 }
 
+cleanup_tailscale() {
+  info "Cleaning up stale Tailscale machines for ${CLUSTER_NAME}..."
+
+  local ts_tailnet="${TAILSCALE_TAILNET:-}"
+  if [ -z "${ts_tailnet}" ]; then
+    warn "TAILSCALE_TAILNET not set. Skipping Tailscale cleanup."
+    warn "Set TAILSCALE_TAILNET to your tailnet name (e.g., 'example.com' or 'ts-abc123')."
+    return 0
+  fi
+
+  local cleanup_script="${SCRIPT_DIR}/cleanup-tailscale.sh"
+  if [ ! -x "${cleanup_script}" ]; then
+    warn "Cleanup script not found at ${cleanup_script}"
+    return 0
+  fi
+
+  # Pass TAILSCALE_TAILNET to the cleanup script
+  # The script handles authentication internally (OAuth from SOPS or direct API key)
+  TAILSCALE_TAILNET="${ts_tailnet}" "${cleanup_script}" "${CLUSTER_NAME}" \
+    || warn "Tailscale cleanup failed (continuing anyway)"
+}
+
 load_or_generate_config() {
   local talosconfig_sops="${TALOS_DIR}/talosconfig.sops.yaml"
   local controlplane_sops="${TALOS_DIR}/controlplane.sops.yaml"
@@ -141,9 +163,15 @@ apply_config() {
   if ts_patch=$(sops -d "${SCRIPT_DIR}/../talos/patches/tailscale.sops.yaml" 2>/dev/null); then
     local ts_tmp
     ts_tmp=$(mktemp)
+    # Inject TS_HOSTNAME into the ExtensionServiceConfig environment array.
+    # After decryption, the environment section looks like:
+    #   environment:
+    #       - TS_AUTHKEY=tskey-auth-...
+    # We append TS_HOSTNAME=cluster-name as a second entry.
+    ts_patch=$(echo "$ts_patch" | sed "/^[[:space:]]*- TS_AUTHKEY=/a\\    - TS_HOSTNAME=${CLUSTER_NAME}")
     echo "$ts_patch" > "$ts_tmp"
     patch_flags+=("--config-patch" "@${ts_tmp}")
-    info "Included Tailscale patch"
+    info "Included Tailscale patch (hostname: ${CLUSTER_NAME})"
   else
     warn "Could not decrypt tailscale.sops.yaml. Ensure SOPS age key is available."
   fi
@@ -284,6 +312,8 @@ show_status() {
 main() {
   check_deps
   wait_for_node
+
+  cleanup_tailscale
 
   local config_result
   config_result=$(load_or_generate_config)
