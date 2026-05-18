@@ -85,45 +85,30 @@ delete_machine() {
   fi
 }
 
-process_machines() {
-  local prefix="$1"
+process_cluster_tag() {
+  local cluster_tag="tag:${CLUSTER_NAME}"
+  info "Scanning for all machines tagged with ${cluster_tag}..."
+
   local filtered_devices
-  
-  # Filter devices that start with prefix
-  filtered_devices=$(echo "${machines}" | jq -c "[.devices[] | select(.name | startswith(\"${prefix}\"))]" 2>/dev/null || echo "[]")
+  filtered_devices=$(echo "${machines}" | jq -c "[.devices[] | select(.tags != null and (.tags | index(\"${cluster_tag}\") != null))]" 2>/dev/null || echo "[]")
 
   local count
   count=$(echo "${filtered_devices}" | jq 'length' 2>/dev/null || echo "0")
-  [ "${count}" -le 0 ] && info "  No machines matching ${prefix}*" && return
-  [ "${count}" -eq 1 ] && info "  One machine: $(echo "${filtered_devices}" | jq -r '.[0].name') (keeping)" && return
+  [ "${count}" -le 0 ] && info "  No machines found with ${cluster_tag}." && return
 
-  info "  Found ${count} machines matching ${prefix}*"
+  info "  Found ${count} machines matching ${cluster_tag}. Deleting all..."
 
-  local connected_id
-  connected_id=$(echo "${filtered_devices}" | jq -r '[.[] | select(.connected == true) | .id] | .[0]' 2>/dev/null)
-  [ "${connected_id}" = "null" ] && connected_id=""
-
-  if [ -n "${connected_id}" ]; then
-    info "  Connected: $(echo "${filtered_devices}" | jq -r ".[] | select(.id == \"${connected_id}\") | .name") (keeping)"
-  fi
-
-  local stale_ids
-  stale_ids=$(echo "${filtered_devices}" | jq -r ".[] | select(.connected != true) | .id" 2>/dev/null)
+  local all_ids
+  all_ids=$(echo "${filtered_devices}" | jq -r ".[] | .id" 2>/dev/null)
   
-  for sid in $stale_ids; do
+  for sid in $all_ids; do
     [ -z "${sid}" ] && continue
-    [ "${sid}" = "${connected_id}" ] && continue
     local sname
     sname=$(echo "${filtered_devices}" | jq -r ".[] | select(.id == \"${sid}\") | .name")
     delete_machine "${sid}" "${sname}"
   done
 }
 
-info "Scanning for stale machines..."
-process_machines "${CLUSTER_NAME}"
-process_machines "soft-serve"
-process_machines "tailscale-operator"
-process_machines "talos-"
-process_machines "${CLUSTER_NAME}-"
+process_cluster_tag
 
-info "Cleanup complete. Deleted ${DELETED_COUNT} stale machines."
+info "Cleanup complete. Deleted ${DELETED_COUNT} machines."
