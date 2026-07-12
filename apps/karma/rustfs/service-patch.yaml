@@ -1,0 +1,13 @@
+# Expose the RustFS S3 API on the tailnet so other clusters (rammus)
+# can use it as a backup object store. Transport is encrypted by Tailscale.
+apiVersion: v1
+kind: Service
+metadata:
+  name: rustfs
+  namespace: rustfs
+  annotations:
+    tailscale.com/hostname: karma-rustfs
+    tailscale.com/tags: tag:karma
+spec:
+  type: LoadBalancer
+  loadBalancerClass: tailscale

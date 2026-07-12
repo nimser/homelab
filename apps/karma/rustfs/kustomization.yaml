@@ -2,3 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ../../base/rustfs
+  - rustfs-credentials.sops.yaml
+  - create-buckets-job.yaml
+patches:
+  - path: service-patch.yaml
