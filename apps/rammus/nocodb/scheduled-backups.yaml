@@ -1,0 +1,30 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: nocodb-db-rustfs
+spec:
+  schedule: "0 0 3 * * *" # daily 03:00 (6-field cron, seconds first)
+  immediate: true
+  backupOwnerReference: self
+  cluster:
+    name: nocodb-db
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io
+    parameters:
+      barmanObjectName: rustfs-store
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: nocodb-db-offsite
+spec:
+  schedule: "0 0 4 * * *" # daily 04:00
+  backupOwnerReference: self
+  cluster:
+    name: nocodb-db
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io
+    parameters:
+      barmanObjectName: offsite-store
