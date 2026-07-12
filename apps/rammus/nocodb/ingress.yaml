@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nocodb
+  namespace: nocodb
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-production"
+    traefik.ingress.kubernetes.io/frontend-entry-points: http,https
+    traefik.ingress.kubernetes.io/redirect-entry-point: https
+    traefik.ingress.kubernetes.io/redirect-permanent: "true"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: ncb.tn.example.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: nocodb
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - ncb.tn.example.com
+      secretName: nocodb-cert

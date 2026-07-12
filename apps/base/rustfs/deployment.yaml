@@ -16,6 +16,9 @@ spec:
       containers:
         - name: rustfs
           image: rustfs/rustfs:latest
+          envFrom:
+            - secretRef:
+                name: rustfs-credentials
           ports:
             - containerPort: 9000
           volumeMounts:

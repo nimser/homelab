@@ -1,0 +1,21 @@
+# Warm backup object store for the nocodb-db cluster (Barman Cloud Plugin):
+# RustFS on karma, reached via the tailnet egress service. Receives
+# continuous WAL archiving (PITR) + daily base backups.
+# A second, offsite store is defined in offsite-objectstore.sops.yaml
+# (encrypted: the plugin requires provider details in spec fields).
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: rustfs-store
+spec:
+  retentionPolicy: 14d
+  configuration:
+    destinationPath: s3://cnpg-rammus/nocodb-db
+    endpointURL: http://rustfs-egress:9000
+    s3Credentials:
+      accessKeyId:
+        name: rustfs-s3-credentials
+        key: ACCESS_KEY_ID
+      secretAccessKey:
+        name: rustfs-s3-credentials
+        key: SECRET_ACCESS_KEY

@@ -1,0 +1,22 @@
+# Dedicated 1-instance PostgreSQL cluster for NocoDB.
+# CNPG auto-generates the app credentials Secret `nocodb-db-app`
+# (keys: username, password, dbname, host, port, uri, ...).
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: nocodb-db
+spec:
+  instances: 1
+  storage:
+    size: 5Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: rustfs-store
