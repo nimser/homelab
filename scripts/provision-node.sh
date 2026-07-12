@@ -212,6 +212,7 @@ apply_config() {
   local patch_flags=(
     "--config-patch" "@${SCRIPT_DIR}/../talos/patches/network.yaml"
     "--config-patch" "@${SCRIPT_DIR}/../talos/patches/podsecurity.yaml"
+    "--config-patch" "@${SCRIPT_DIR}/../talos/patches/scheduling.yaml"
     "--config-patch" "@${hostname_patch}"
   )
 
