@@ -35,12 +35,17 @@ spec:
               value: redis://teable-redis:6379/0
             - name: NEXT_ENV_IMAGES_ALL_REMOTE
               value: "true"
+            # The bundled node backend exceeds its default V8 heap during boot
+            # (exit 134 crash loops); cap the heap explicitly below the
+            # container limit.
+            - name: NODE_OPTIONS
+              value: --max-old-space-size=1536
           resources:
             requests:
               cpu: 100m
               memory: 512Mi
             limits:
-              memory: 1Gi
+              memory: 2Gi
           securityContext:
             allowPrivilegeEscalation: false
           readinessProbe:
