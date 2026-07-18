@@ -1,0 +1,32 @@
+# Public entry point for Teable attachments: browsers fetch objects straight
+# from the storage endpoint (public bucket URLs / presigned private URLs), so
+# RustFS on karma is exposed here through the tailnet egress service.
+# Requires Traefik's `allowExternalNameServices` (enabled in the rammus
+# traefik release patch).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rustfs
+  namespace: teable
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-production"
+    traefik.ingress.kubernetes.io/frontend-entry-points: http,https
+    traefik.ingress.kubernetes.io/redirect-entry-point: https
+    traefik.ingress.kubernetes.io/redirect-permanent: "true"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: rustfs.tn.example.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: rustfs-egress
+                port:
+                  number: 9000
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - rustfs.tn.example.com
+      secretName: rustfs-cert
