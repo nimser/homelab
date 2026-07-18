@@ -1,0 +1,80 @@
+# One-shot idempotent provisioning job: buckets, bucket policies, and scoped
+# IAM users expected by consumers. RustFS IAM state lives on its PVC (not in
+# git), so this job is the declarative source of truth, re-applied by Flux on
+# every change (the force annotation lets Flux recreate the immutable Job).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rustfs-provision
+  namespace: rustfs
+  annotations:
+    kustomize.toolkit.fluxcd.io/force: "true"
+spec:
+  backoffLimit: 6
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: provision
+          image: minio/mc:RELEASE.2025-08-13T08-35-41Z
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eu
+              mc alias set rustfs http://rustfs:9000 "$RUSTFS_ACCESS_KEY" "$RUSTFS_SECRET_KEY"
+
+              mc mb --ignore-existing rustfs/cnpg-rammus rustfs/teable-pub rustfs/teable-pvt
+
+              # Teable serves public-bucket attachments as plain URLs (no
+              # presign): the bucket needs anonymous read.
+              mc anonymous set download rustfs/teable-pub
+
+              # Scoped IAM user for Teable: keeps the rustfs root key out of
+              # the (browser-facing) teable app. Re-adding the user resets its
+              # password to the secret value, so credential rotation = editing
+              # the secret and letting this job re-run.
+              cat > /tmp/teable-scoped.json <<'POLICY'
+              {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Action": ["s3:*"],
+                    "Resource": [
+                      "arn:aws:s3:::teable-pub",
+                      "arn:aws:s3:::teable-pub/*",
+                      "arn:aws:s3:::teable-pvt",
+                      "arn:aws:s3:::teable-pvt/*"
+                    ]
+                  }
+                ]
+              }
+              POLICY
+              mc admin policy create rustfs teable-scoped /tmp/teable-scoped.json
+              mc admin user add rustfs "$TEABLE_S3_ACCESS_KEY" "$TEABLE_S3_SECRET_KEY"
+              if ! mc admin user info rustfs "$TEABLE_S3_ACCESS_KEY" | grep -q teable-scoped; then
+                mc admin policy attach rustfs teable-scoped --user "$TEABLE_S3_ACCESS_KEY"
+              fi
+              echo "provisioning complete"
+          env:
+            - name: RUSTFS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-credentials
+                  key: RUSTFS_ACCESS_KEY
+            - name: RUSTFS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-credentials
+                  key: RUSTFS_SECRET_KEY
+            - name: TEABLE_S3_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: teable-s3-user
+                  key: TEABLE_S3_ACCESS_KEY
+            - name: TEABLE_S3_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: teable-s3-user
+                  key: TEABLE_S3_SECRET_KEY
