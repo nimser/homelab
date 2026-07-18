@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: teable
+resources:
+  - ../../base/teable/
+  - cluster.yaml
+  - objectstores.yaml
+  - offsite-objectstore.sops.yaml
+  - scheduled-backups.yaml
+  - rustfs-egress.yaml
+  - ingress.yaml
+  - rustfs-ingress.yaml
+  - teable-credentials.sops.yaml
+  - rustfs-s3-credentials.sops.yaml
+  - offsite-credentials.sops.yaml
+patches:
+  - path: deployment-patch.yaml

@@ -1,0 +1,57 @@
+# Standalone Teable (community edition, AGPL): tables/collaboration/API/automation,
+# no AI runtime plane. Cluster-specific env (PUBLIC_ORIGIN, S3 storage) is added
+# via overlay patches. Attachments go to S3-compatible storage, so no PVC here;
+# the image runs its own DB migrations on startup (hence Recreate + 1 replica).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: teable
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: teable
+  template:
+    metadata:
+      labels:
+        app: teable
+    spec:
+      containers:
+        - name: teable
+          image: ghcr.io/teableio/teable:release.2026-07-17T05-20-38Z.2264
+          ports:
+            - containerPort: 3000
+          env:
+            - name: PRISMA_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: teable-db-app
+                  key: uri
+            - name: BACKEND_CACHE_PROVIDER
+              value: redis
+            - name: BACKEND_CACHE_REDIS_URI
+              value: redis://teable-redis:6379/0
+            - name: NEXT_ENV_IMAGES_ALL_REMOTE
+              value: "true"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 120
+            periodSeconds: 30
