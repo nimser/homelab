@@ -1,0 +1,29 @@
+# Dedicated 1-instance PostgreSQL cluster for Teable.
+# CNPG auto-generates the app credentials Secret `teable-db-app`
+# (keys: username, password, dbname, host, port, uri, ...).
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: teable-db
+spec:
+  instances: 1
+  storage:
+    size: 5Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: rustfs-store
+    # Second store declaration is required so the plugin sidecar knows about
+    # the offsite store; otherwise ScheduledBackups referencing it silently
+    # fall back to the store configured above.
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: false
+      parameters:
+        barmanObjectName: offsite-store

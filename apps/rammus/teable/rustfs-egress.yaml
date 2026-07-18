@@ -1,0 +1,14 @@
+# Tailscale egress service: gives in-cluster DNS name `rustfs-egress`
+# that forwards to RustFS on karma over the tailnet. Ports are declared so
+# the rustfs ingress (attachment access for browsers) can target it.
+apiVersion: v1
+kind: Service
+metadata:
+  name: rustfs-egress
+  annotations:
+    tailscale.com/tailnet-fqdn: karma-rustfs.example.ts.net
+spec:
+  type: ExternalName
+  externalName: placeholder
+  ports:
+    - port: 9000

@@ -8,6 +8,10 @@ spec:
       kubernetesIngress:
         publishedService:
           enabled: true
+        # Allow Ingress backends pointing at ExternalName services: used by the
+        # rustfs ingress (teable attachments) to reach RustFS on karma through
+        # the tailscale egress service.
+        allowExternalNameServices: true
     service:
       type: LoadBalancer
       annotations:

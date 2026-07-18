@@ -1,0 +1,35 @@
+# Rammus-specific Teable config: public origin and attachment storage on
+# RustFS (karma) via the tailnet egress. The browser fetches attachments
+# directly from the storage endpoint, so it points at the public
+# rustfs.tn.example.com ingress while the backend talks to rustfs-egress in-cluster.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: teable
+spec:
+  template:
+    spec:
+      containers:
+        - name: teable
+          env:
+            - name: PUBLIC_ORIGIN
+              value: https://tbl.tn.example.com
+            - name: BACKEND_STORAGE_PROVIDER
+              value: minio
+            - name: BACKEND_STORAGE_PUBLIC_BUCKET
+              value: teable-pub
+            - name: BACKEND_STORAGE_PRIVATE_BUCKET
+              value: teable-pvt
+            - name: BACKEND_STORAGE_MINIO_ENDPOINT
+              value: rustfs.tn.example.com
+            - name: BACKEND_STORAGE_MINIO_PORT
+              value: "443"
+            - name: BACKEND_STORAGE_MINIO_USE_SSL
+              value: "true"
+            - name: BACKEND_STORAGE_MINIO_INTERNAL_ENDPOINT
+              value: rustfs-egress
+            - name: BACKEND_STORAGE_MINIO_INTERNAL_PORT
+              value: "9000"
+          envFrom:
+            - secretRef:
+                name: teable-credentials
