@@ -10,12 +10,20 @@
   },
   "packageRules": [
     {
-      "description": "Teable uses release.<timestamp>.<build> tags; sort by monotonic build number and automerge",
+      "description": "Automerge non-major image updates in kubernetes manifests via PR; majors stay manual",
+      "matchManagers": ["kubernetes"],
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin"],
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Teable uses release.<timestamp>.<build> tags; sort by monotonic build number, automerge all bumps (build number maps to major)",
       "matchDatasources": ["docker"],
       "matchPackageNames": ["ghcr.io/teableio/teable"],
       "versioning": "regex:^release\\.\\d{4}-\\d{2}-\\d{2}T\\d{2}-\\d{2}-\\d{2}Z\\.(?<major>\\d+)$",
       "automerge": true,
-      "automergeType": "branch"
+      "automergeType": "pr"
     }
   ]
 }
