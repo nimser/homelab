@@ -1,0 +1,21 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "kubernetes": {
+    "managerFilePatterns": [
+      "/^apps/.+\\.ya?ml$/",
+      "/^infrastructure/.+\\.ya?ml$/",
+      "/^monitoring/.+\\.ya?ml$/"
+    ]
+  },
+  "packageRules": [
+    {
+      "description": "Teable uses release.<timestamp>.<build> tags; sort by monotonic build number and automerge",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/teableio/teable"],
+      "versioning": "regex:^release\\.\\d{4}-\\d{2}-\\d{2}T\\d{2}-\\d{2}-\\d{2}Z\\.(?<major>\\d+)$",
+      "automerge": true,
+      "automergeType": "branch"
+    }
+  ]
+}
