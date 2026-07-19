@@ -22,7 +22,7 @@ spec:
         fsGroup: 999
       containers:
         - name: redis
-          image: redis:7.4.2-alpine
+          image: redis:7.4.9-alpine
           command: ["redis-server", "--appendonly", "yes"]
           ports:
             - containerPort: 6379
