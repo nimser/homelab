@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: soft-serve
-          image: ghcr.io/charmbracelet/soft-serve:v0.7.1
+          image: ghcr.io/charmbracelet/soft-serve:v0.11.6
           ports:
             - containerPort: 23231
           env:
