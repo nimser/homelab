@@ -20,7 +20,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: nocodb
-          image: nocodb/nocodb:2026.06.2
+          image: nocodb/nocodb:2026.07.0
           ports:
             - containerPort: 8080
           env:
