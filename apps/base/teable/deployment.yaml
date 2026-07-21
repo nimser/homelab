@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: teable
-          image: ghcr.io/teableio/teable:release.2026-07-21T04-38-35Z.2304
+          image: ghcr.io/teableio/teable:release.2026-07-21T11-27-40Z.2320
           ports:
             - containerPort: 3000
           env:
