@@ -13,6 +13,7 @@ resources:
   - cloudflare.yaml
   - tunnel-credentials.sops.yaml
   - teable-credentials.sops.yaml
+  - teable-oauth.sops.yaml
   - rustfs-s3-credentials.sops.yaml
   - offsite-credentials.sops.yaml
 patches:
