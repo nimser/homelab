@@ -10,6 +10,8 @@ resources:
   - rustfs-egress.yaml
   - ingress.yaml
   - rustfs-ingress.yaml
+  - cloudflare.yaml
+  - tunnel-credentials.sops.yaml
   - teable-credentials.sops.yaml
   - rustfs-s3-credentials.sops.yaml
   - offsite-credentials.sops.yaml
