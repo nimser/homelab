@@ -13,7 +13,9 @@ spec:
         - name: teable
           env:
             - name: PUBLIC_ORIGIN
-              value: https://tbl.tn.example.com
+              value: https://tbl.example.com
+            - name: SOCIAL_AUTH_PROVIDERS
+              value: google
             - name: BACKEND_STORAGE_PROVIDER
               value: minio
             - name: BACKEND_STORAGE_PUBLIC_BUCKET
@@ -33,3 +35,5 @@ spec:
           envFrom:
             - secretRef:
                 name: teable-credentials
+            - secretRef:
+                name: teable-oauth
