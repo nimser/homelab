@@ -1,3 +1,11 @@
+> [!Caution]
+> **MIRROR NOTICE**
+>
+> This repository is automatically mirrored from a private source and published for reference only.
+> Commit history is regularly rewritten (including commit hashes).
+>
+> *Standard upgrade paths MIGHT be compromised!*
+
 # Homelab
 
 GitOps-managed homelab infrastructure using Kubernetes (Talos), FluxCD, and SOPS.
