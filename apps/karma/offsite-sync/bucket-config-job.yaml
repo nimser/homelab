@@ -1,0 +1,106 @@
+# Declarative source of truth for the offsite bucket's protection settings.
+#
+# Versioning + lifecycle live on offsite S3, outside git — same class of
+# imperative external state as RustFS IAM, so it gets the same treatment as
+# apps/karma/rustfs/provision-job.yaml: an idempotent Job that Flux recreates
+# on every change (force annotation). Without this the retention policy is
+# console-clicked state that a rebuild silently loses.
+#
+# Note: the offsite S3 web console exposes neither of these settings; the S3
+# API accepts them regardless. AbortIncompleteMultipartUpload is NOT
+# implemented (accepted with 200 then dropped, rejected outright when sent
+# alone), so incomplete uploads are reaped client-side by the sync CronJob.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: offsite-bucket-config
+  namespace: rustfs
+  annotations:
+    kustomize.toolkit.fluxcd.io/force: "enabled"
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: configure
+          image: amazon/aws-cli:2.36.10
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eu
+              export AWS_ACCESS_KEY_ID="$ACCESS_KEY_ID"
+              export AWS_SECRET_ACCESS_KEY="$SECRET_ACCESS_KEY"
+
+              # Versioning is what makes `rclone sync` safe: a deletion in
+              # RustFS becomes a delete marker offsite, not data loss.
+              aws --endpoint-url "$ENDPOINT" s3api put-bucket-versioning \
+                --bucket "$OFFSITE_BUCKET" \
+                --versioning-configuration Status=Enabled
+
+              cat > /tmp/lifecycle.json <<'JSON'
+              {
+                "Rules": [
+                  {
+                    "ID": "expire-noncurrent-30d",
+                    "Filter": { "Prefix": "" },
+                    "Status": "Enabled",
+                    "NoncurrentVersionExpiration": { "NoncurrentDays": 30 }
+                  },
+                  {
+                    "ID": "expire-delete-markers",
+                    "Filter": { "Prefix": "" },
+                    "Status": "Enabled",
+                    "Expiration": { "ExpiredObjectDeleteMarker": true }
+                  }
+                ]
+              }
+              JSON
+
+              # 30d matches the CNPG offsite retention, so database and
+              # objects can always be recovered to a common point in time.
+              aws --endpoint-url "$ENDPOINT" s3api put-bucket-lifecycle-configuration \
+                --bucket "$OFFSITE_BUCKET" \
+                --lifecycle-configuration file:///tmp/lifecycle.json
+
+              echo "== effective configuration"
+              aws --endpoint-url "$ENDPOINT" s3api get-bucket-versioning --bucket "$OFFSITE_BUCKET"
+              aws --endpoint-url "$ENDPOINT" s3api get-bucket-lifecycle-configuration --bucket "$OFFSITE_BUCKET"
+          env:
+            - name: OFFSITE_BUCKET
+              value: offsite-objects
+            - name: ENDPOINT
+              value: https://s3.eu-west-1.offsite-s3.example.com
+            - name: AWS_DEFAULT_REGION
+              value: eu-west-1
+            - name: HOME
+              value: /tmp
+            - name: AWS_EC2_METADATA_DISABLED
+              value: "true"
+          envFrom:
+            - secretRef:
+                name: offsite-s3-credentials
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
