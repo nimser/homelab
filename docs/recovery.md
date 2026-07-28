@@ -32,6 +32,7 @@ the other.
 | App | State | Backed up | Gap |
 |---|---|---|---|
 | **teable** | CNPG `teable-db`; attachments in RustFS `attachments-public`/`attachments-private`; Redis PVC (cache) | DB: warm + cold. Attachments: cold nightly | Redis is a disposable cache |
+| **nocodb** | CNPG `nocodb-db`; `nocodb-data-pvc` (5Gi) | DB: warm + cold | **PVC not backed up** — attachments live on local disk, not S3 |
 | **linkding** | `linkding-data-pvc` (1Gi, SQLite) | nothing | **No backup** |
 | **audiobookshelf** | config + metadata PVCs (500Mi each), audiobooks + podcasts PVCs (50Gi each) | nothing | **No backup**; media is reacquirable, config/metadata is not |
 | **soft-serve** | `repos` PVC (10Gi, Gopass store) | nothing | **No backup** — planned in `openspec/changes/backup-strategy`, never implemented. Mitigated only by every clone being a full copy |
@@ -174,8 +175,8 @@ from the machine holding the TPM.
 
 ## Known gaps
 
-- **Soft Serve, linkding and audiobookshelf have no backup.** Local-path
-  PVCs on a single-node cluster: node loss means data loss.
+- **Soft Serve, linkding, audiobookshelf, nocodb's PVC have no backup.**
+  Local-path PVCs on a single-node cluster: node loss means data loss.
 - **`DeleteObjectVersion` is permitted** on `offsite-objects`. Accidental deletions
   are still fully recoverable (`rclone sync` only issues plain deletes, which
   create delete markers), but a holder of the key could purge version history
