@@ -108,3 +108,16 @@ Rust-based file storage service for backup targets.
 - **Secrets**: SOPS + Age encryption
 - **Storage**: local-path provisioner
 - **Networking**: Tailscale zero-trust network for service exposure
+
+## Backups
+
+Two data classes, backed up independently:
+
+- **Postgres** (CloudNativePG + barman-cloud): continuous WAL archiving plus
+  daily base backups to RustFS on karma (14d) and to offsite S3 (30d). Both
+  tiers support point-in-time recovery.
+- **S3 objects** (Teable attachments): nightly `rclone sync` from RustFS to a
+  versioned offsite S3 bucket, 30d of noncurrent versions.
+
+See [recovery strategy](docs/recovery.md) for per-app coverage, restore
+procedures, and known gaps.
