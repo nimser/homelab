@@ -64,9 +64,14 @@ data:
       # hostname, so it must resolve both publicly and from inside the cluster.
       # `rustfs.tn.example.com` is a CNAME to a MagicDNS name and resolves on the
       # tailnet only, hence the tunnel hostname here.
+      # Only object/bucket paths of the two Teable buckets are forwarded, so
+      # the RustFS admin and console endpoints stay off the public side.
       - hostname: s3.example.com
+        path: ^/teable-(pub|pvt)(/|$)
         service: http://rustfs-egress:9000
         originRequest:
           # S3 SigV4 signs the Host header; keep the client's Host untouched.
           connectTimeout: 30s
+      - hostname: s3.example.com
+        service: http_status:404
       - service: http_status:404
