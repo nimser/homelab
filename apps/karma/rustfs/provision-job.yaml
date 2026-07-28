@@ -78,6 +78,35 @@ spec:
               if ! mc admin user info rustfs "$TEABLE_S3_ACCESS_KEY" | grep -q teable-scoped; then
                 mc admin policy attach rustfs teable-scoped --user "$TEABLE_S3_ACCESS_KEY"
               fi
+
+              # Read-only user for the offsite sync CronJob
+              # (apps/karma/offsite-sync/): it only ever reads from RustFS,
+              # so it cannot be the vector that destroys the data it mirrors.
+              # Restores run in the other direction and use the root key
+              # manually. Add new buckets here as apps are onboarded.
+              cat > /tmp/backup-readonly.json <<'POLICY'
+              {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Action": ["s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket"],
+                    "Resource": [
+                      "arn:aws:s3:::attachments-public",
+                      "arn:aws:s3:::attachments-public/*",
+                      "arn:aws:s3:::attachments-private",
+                      "arn:aws:s3:::attachments-private/*"
+                    ]
+                  }
+                ]
+              }
+              POLICY
+              mc admin policy create rustfs backup-readonly /tmp/backup-readonly.json
+              mc admin user add rustfs "$BACKUP_S3_ACCESS_KEY" "$BACKUP_S3_SECRET_KEY"
+              if ! mc admin user info rustfs "$BACKUP_S3_ACCESS_KEY" | grep -q backup-readonly; then
+                mc admin policy attach rustfs backup-readonly --user "$BACKUP_S3_ACCESS_KEY"
+              fi
+
               echo "provisioning complete"
           env:
             - name: RUSTFS_ACCESS_KEY
@@ -100,3 +129,13 @@ spec:
                 secretKeyRef:
                   name: teable-s3-user
                   key: TEABLE_S3_SECRET_KEY
+            - name: BACKUP_S3_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: backup-s3-user
+                  key: BACKUP_S3_ACCESS_KEY
+            - name: BACKUP_S3_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: backup-s3-user
+                  key: BACKUP_S3_SECRET_KEY

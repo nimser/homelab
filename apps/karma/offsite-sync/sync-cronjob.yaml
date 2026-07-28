@@ -1,0 +1,134 @@
+# Nightly offsite replication of the RustFS object tier to offsite S3.
+#
+# Counterpart to the CNPG barman backups: those cover Postgres, this covers
+# the S3 objects apps reference from Postgres rows (Teable attachments today,
+# media for future apps). Without it a RustFS disk loss leaves a restored
+# database full of dangling attachment references.
+#
+# Layout is a 1:1 mirror so restore is the same command flipped:
+#   rclone sync dst:offsite-objects/attachments-private src:attachments-private
+# and a point-in-time restore (bucket versioning is on offsite) is:
+#   rclone sync --s3-version-at <ts> dst:offsite-objects/attachments-private src:attachments-private
+#
+# Onboarding a new app = add its bucket to BUCKETS below.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: offsite-sync
+  namespace: rustfs
+spec:
+  # 05:20 UTC: after both CNPG windows (03:10 rustfs, 04:10 offsite) so the
+  # nightly S3 traffic never overlaps a base backup.
+  schedule: "20 5 * * *"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 3600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: rclone
+              image: rclone/rclone:1.74.4
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+                  touch "$RCLONE_CONFIG"
+
+                  # Recorded before the sync: objects offsite reflect the
+                  # source as of (at earliest) this instant, so a coherent
+                  # recovery is "PITR the database back to this timestamp".
+                  START="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+                  for bucket in $BUCKETS; do
+                    echo "==> syncing ${bucket}"
+                    rclone sync "src:${bucket}" "dst:${OFFSITE_BUCKET}/${bucket}" \
+                      --transfers 8 --checkers 16 --fast-list --retries 3 \
+                      --stats 5m --stats-one-line --log-level INFO
+                  done
+
+                  printf '%s\n' "$START" | rclone rcat "dst:${OFFSITE_BUCKET}/_last-sync"
+
+                  # offsite S3 lifecycle does not implement
+                  # AbortIncompleteMultipartUpload (silently dropped on PUT),
+                  # so orphaned parts have to be reaped client-side.
+                  rclone backend cleanup "dst:${OFFSITE_BUCKET}" -o max-age=7d
+
+                  echo "offsite sync complete (marker: ${START})"
+              env:
+                - name: BUCKETS
+                  value: "attachments-public attachments-private"
+                - name: OFFSITE_BUCKET
+                  value: offsite-objects
+                - name: HOME
+                  value: /tmp
+                - name: RCLONE_CONFIG
+                  value: /tmp/rclone.conf
+                # Source: RustFS in this cluster, read-only IAM user
+                # provisioned by apps/karma/rustfs/provision-job.yaml.
+                - name: RCLONE_CONFIG_SRC_TYPE
+                  value: s3
+                - name: RCLONE_CONFIG_SRC_PROVIDER
+                  value: Minio
+                - name: RCLONE_CONFIG_SRC_ENDPOINT
+                  value: http://rustfs:9000
+                - name: RCLONE_CONFIG_SRC_REGION
+                  value: us-east-1
+                - name: RCLONE_CONFIG_SRC_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-s3-user
+                      key: BACKUP_S3_ACCESS_KEY
+                - name: RCLONE_CONFIG_SRC_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-s3-user
+                      key: BACKUP_S3_SECRET_KEY
+                # Destination: offsite S3, key scoped to the offsite-objects bucket.
+                - name: RCLONE_CONFIG_DST_TYPE
+                  value: s3
+                - name: RCLONE_CONFIG_DST_PROVIDER
+                  value: Other
+                - name: RCLONE_CONFIG_DST_ENDPOINT
+                  value: https://s3.eu-west-1.offsite-s3.example.com
+                # The scoped key has no CreateBucket/HeadBucket rights.
+                - name: RCLONE_CONFIG_DST_NO_CHECK_BUCKET
+                  value: "true"
+                - name: RCLONE_CONFIG_DST_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: offsite-s3-credentials
+                      key: ACCESS_KEY_ID
+                - name: RCLONE_CONFIG_DST_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: offsite-s3-credentials
+                      key: SECRET_ACCESS_KEY
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  memory: 512Mi
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: tmp
+              emptyDir: {}

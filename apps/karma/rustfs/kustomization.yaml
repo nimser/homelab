@@ -4,6 +4,7 @@ resources:
   - ../../base/rustfs
   - rustfs-credentials.sops.yaml
   - teable-s3-user.sops.yaml
+  - backup-s3-user.sops.yaml
   - provision-job.yaml
 patches:
   - path: service-patch.yaml
