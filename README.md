@@ -101,6 +101,19 @@ Rust-based file storage service for backup targets.
 - **Storage**: local-path provisioner
 - **Networking**: Tailscale zero-trust network for service exposure
 
+## Backups
+
+Two data classes, backed up independently:
+
+- **Postgres** (CloudNativePG + barman-cloud): continuous WAL archiving plus
+  daily base backups to RustFS on karma (14d) and to offsite S3 (30d). Both
+  tiers support point-in-time recovery.
+- **S3 objects** (Teable attachments): nightly `rclone sync` from RustFS to a
+  versioned offsite S3 bucket, 30d of noncurrent versions.
+
+See [recovery strategy](docs/recovery.md) for per-app coverage, restore
+procedures, and known gaps.
+
 ## Contributing
 
 This repository is a mirror of a private one. It publishes the paths its allowlist names, so it may be a
