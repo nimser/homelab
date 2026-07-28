@@ -30,6 +30,28 @@ spec:
               # presign): the bucket needs anonymous read.
               mc anonymous set download rustfs/attachments-public
 
+              # The Teable web client uploads/downloads objects straight from
+              # the storage endpoint, so RustFS must accept cross-origin
+              # requests from the app origins (browsers otherwise block the
+              # presigned PUT/POST and the attachment fetches).
+              cat > /tmp/teable-cors.xml <<'CORS'
+              <CORSConfiguration>
+                <CORSRule>
+                  <AllowedOrigin>https://tbl.example.com</AllowedOrigin>
+                  <AllowedOrigin>https://tbl.tn.example.com</AllowedOrigin>
+                  <AllowedMethod>GET</AllowedMethod>
+                  <AllowedMethod>HEAD</AllowedMethod>
+                  <AllowedMethod>PUT</AllowedMethod>
+                  <AllowedMethod>POST</AllowedMethod>
+                  <AllowedHeader>*</AllowedHeader>
+                  <ExposeHeader>ETag</ExposeHeader>
+                  <MaxAgeSeconds>3000</MaxAgeSeconds>
+                </CORSRule>
+              </CORSConfiguration>
+              CORS
+              mc cors set rustfs/attachments-public /tmp/teable-cors.xml
+              mc cors set rustfs/attachments-private /tmp/teable-cors.xml
+
               # Scoped IAM user for Teable: keeps the rustfs root key out of
               # the (browser-facing) teable app. Re-adding the user resets its
               # password to the secret value, so credential rotation = editing
