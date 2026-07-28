@@ -1,7 +1,10 @@
 # Rammus-specific Teable config: public origin and attachment storage on
 # RustFS (karma) via the tailnet egress. The browser fetches attachments
-# directly from the storage endpoint, so it points at the public
-# rustfs.tn.example.com ingress while the backend talks to rustfs-egress in-cluster.
+# directly from the storage endpoint, and the backend also resolves that same
+# endpoint when signing URLs, so it must be public DNS: s3.example.com goes through
+# the same cloudflared tunnel as tbl.example.com. (rustfs.tn.example.com is a CNAME to a
+# MagicDNS name: tailnet-only, NXDOMAIN from the pod's cluster resolver.)
+# Server-side object I/O still short-circuits through rustfs-egress in-cluster.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -23,7 +26,7 @@ spec:
             - name: BACKEND_STORAGE_PRIVATE_BUCKET
               value: attachments-private
             - name: BACKEND_STORAGE_MINIO_ENDPOINT
-              value: rustfs.tn.example.com
+              value: s3.example.com
             - name: BACKEND_STORAGE_MINIO_PORT
               value: "443"
             - name: BACKEND_STORAGE_MINIO_USE_SSL
