@@ -100,6 +100,7 @@ talosctl config context rammus
 talosctl config context karma
 ```
 
+
 To easily switch between the `rammus` and `karma` Kubernetes clusters, you can use `kubectx`.
 
 Since the kubeconfigs are generated dynamically in `/tmp` and reset when your environment is rebuilt, we recommend managing the `KUBECONFIG` path in a local `.envrc` file (which is ignored by git).
