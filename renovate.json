@@ -20,6 +20,16 @@
       "automergeType": "pr"
     },
     {
+      "description": "Review RustFS storage upgrades manually; track numbered releases without preview or libc variants",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["rustfs/rustfs"],
+      "versioning": "semver",
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+(-(beta|rc)\\.\\d+)?$/",
+      "ignoreUnstable": false,
+      "pinDigests": true,
+      "automerge": false
+    },
+    {
       "description": "Teable uses release.<timestamp>.<build> tags; sort by monotonic build number, automerge all bumps (build number maps to major)",
       "matchDatasources": ["docker"],
       "matchPackageNames": ["ghcr.io/teableio/teable"],
