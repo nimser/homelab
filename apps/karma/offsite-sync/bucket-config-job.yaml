@@ -30,7 +30,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: configure
-          image: amazon/aws-cli:2.36.48
+          image: amazon/aws-cli:2.36.49
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
