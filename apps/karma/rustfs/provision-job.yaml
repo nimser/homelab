@@ -26,9 +26,21 @@ spec:
 
               mc mb --ignore-existing rustfs/cnpg-backups rustfs/attachments-public rustfs/attachments-private
 
-              # Teable serves public-bucket attachments as plain URLs (no
-              # presign): the bucket needs anonymous read.
-              mc anonymous set download rustfs/attachments-public
+              # Public attachments need anonymous object reads, not bucket listing.
+              cat > /tmp/attachments-publiclic-read.json <<'POLICY'
+              {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": "*",
+                    "Action": ["s3:GetObject"],
+                    "Resource": ["arn:aws:s3:::attachments-public/*"]
+                  }
+                ]
+              }
+              POLICY
+              mc anonymous set-json /tmp/attachments-publiclic-read.json rustfs/attachments-public
 
               # The Teable web client uploads/downloads objects straight from
               # the storage endpoint, so RustFS must accept cross-origin
