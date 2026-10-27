@@ -80,4 +80,9 @@ data:
           connectTimeout: 30s
       - hostname: s3.example.com
         service: http_status:404
+      # Shared-access LLM gateway; CPA stays behind it and off the public side.
+      - hostname: litellm.dverge.zone
+        service: http://litellm.litellm.svc.cluster.local:4000
+        originRequest:
+          connectTimeout: 30s
       - service: http_status:404
