@@ -49,6 +49,8 @@ Grafana is available at **https://gfn.tn.example.com** from Tailscale-connected 
 Its DNS-only A record points to the rammus Traefik address, `100.91.247.71`.
 Traefik routes to `kube-prometheus-stack-grafana` in the `monitoring` namespace;
 cert-manager provisions `grafana-tailnet-tls` through `letsencrypt-production`.
+See [monitoring](monitoring.md) for the default overview, detailed dashboards and
+GitOps configuration.
 
 ## Cloudflare Tunnel
 

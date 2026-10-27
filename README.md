@@ -94,6 +94,12 @@ Rust-based file storage service for backup targets.
 - **Namespace**: rustfs
 - **Storage**: local-path PVC (100Gi)
 
+## Monitoring
+
+[Grafana](https://gfn.tn.example.com) provides a GitOps-managed **Homelab Overview**
+for rammus CPU, RAM, disk, pod health and restarts. Access requires Tailscale.
+See the [monitoring guide](docs/monitoring.md) for usage and configuration.
+
 ## Infrastructure
 
 - **GitOps**: FluxCD
