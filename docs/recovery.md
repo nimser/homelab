@@ -36,6 +36,7 @@ the other.
 | **linkding** | `linkding-data-pvc` (1Gi, SQLite) | nothing | **No backup** |
 | **audiobookshelf** | config + metadata PVCs (500Mi each), audiobooks + podcasts PVCs (50Gi each) | nothing | **No backup**; media is reacquirable, config/metadata is not |
 | **soft-serve** | `repos` PVC (10Gi, Gopass store) | nothing | **No backup** — planned in `openspec/changes/backup-strategy`, never implemented. Mitigated only by every clone being a full copy |
+| **litellm** | CNPG `litellm-db` (keys, users, prompt and response logs) | nothing | **No backup**: node loss loses every key, user and log; see `litellm.md` |
 | **rustfs** | `rustfs-data-pvc` (220Gi) — the object tier itself | Teable buckets only, cold | `cnpg-backups` bucket is a backup target, not backed up further (the offsite copy is the second copy) |
 
 ## Restoring Postgres
