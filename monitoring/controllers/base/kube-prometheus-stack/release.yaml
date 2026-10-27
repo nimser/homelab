@@ -30,7 +30,36 @@ spec:
       valuesKey: adminPassword
       targetPath: grafana.adminPassword
   values:
+    # Memory limits keep both out of the Talos OOM controller's victim ranking, which only picks unlimited pods.
+    prometheus:
+      prometheusSpec:
+        resources:
+          requests:
+            memory: 512Mi
+          limits:
+            memory: 1Gi
+    additionalPrometheusRulesMap:
+      node-memory:
+        groups:
+          - name: node-memory
+            rules:
+              # Leaked containerd shims sit outside pod cgroups: node usage not attributed to pods (normally 1.2-1.8 GiB) grows.
+              - alert: UnattributedNodeMemoryHigh
+                expr: |
+                  (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes)
+                    - on() sum(container_memory_working_set_bytes{container!="", container!="POD", id=~"/kubepods.*"})
+                    > 2.3 * 1024^3
+                for: 30m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: Node memory outside pods exceeds 2.3 GiB; check for orphaned containerd-shim processes (docs/talos.md).
     grafana:
+      resources:
+        requests:
+          memory: 192Mi
+        limits:
+          memory: 512Mi
       ingress:
         enabled: true
         ingressClassName: traefik

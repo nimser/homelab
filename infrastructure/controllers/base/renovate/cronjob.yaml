@@ -6,13 +6,22 @@ metadata:
 spec:
   schedule: "@hourly"
   concurrencyPolicy: Forbid
+  # Update freeze around the 2026-10-29 workshop; set false on 2026-10-31.
+  suspend: true
   jobTemplate:
     spec:
+      backoffLimit: 1
       template:
         spec:
           containers:
             - name: renovate
               image: renovate/renovate:latest
+              # Peaks near 900 MiB; a limit keeps it out of the Talos OOM controller's victim ranking.
+              resources:
+                requests:
+                  memory: 512Mi
+                limits:
+                  memory: 1280Mi
               env:
                 - name: RENOVATE_CONFIG_FILE
                   value: "/opt/renovate/config.json"
