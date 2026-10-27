@@ -54,9 +54,12 @@ spec:
               port: 3000
             initialDelaySeconds: 15
             periodSeconds: 10
+            timeoutSeconds: 5
           livenessProbe:
             httpGet:
               path: /health
               port: 3000
             initialDelaySeconds: 120
             periodSeconds: 30
+            # The default 1s timeout restarted Teable repeatedly under node memory pressure.
+            timeoutSeconds: 5
