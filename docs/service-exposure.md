@@ -43,6 +43,13 @@ curl -s -H 'accept: application/dns-json' 'https://cloudflare-dns.com/dns-query?
 
 An answer carrying only a `ts.net` CNAME and `"Status": 3` means the host is CNAME-shaped and will fail on every client that does not stitch the chain.
 
+### Grafana
+
+Grafana is available at **https://gfn.tn.example.com** from Tailscale-connected clients.
+Its DNS-only A record points to the rammus Traefik address, `100.91.247.71`.
+Traefik routes to `kube-prometheus-stack-grafana` in the `monitoring` namespace;
+cert-manager provisions `grafana-tailnet-tls` through `letsencrypt-production`.
+
 ## Cloudflare Tunnel
 
 Services exposed via Cloudflare Tunnel (`cloudflared`) use Cloudflare's edge TLS. The tunnel terminates TLS at Cloudflare's edge and forwards traffic over an encrypted connection to the service. No cert-manager configuration is needed.
