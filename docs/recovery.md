@@ -32,7 +32,7 @@ the other.
 | App | State | Backed up | Gap |
 |---|---|---|---|
 | **teable** | CNPG `teable-db`; attachments in RustFS `attachments-public`/`attachments-private`; Redis PVC (cache) | DB: warm + cold. Attachments: cold nightly | Redis is a disposable cache |
-| **nocodb** | CNPG `nocodb-db`; `nocodb-data-pvc` (5Gi) | DB: warm + cold | **PVC not backed up** — attachments live on local disk, not S3 |
+| **nocodb** | CNPG `nocodb-db`; `nocodb-data-pvc` (5Gi) | DB: warm + cold; suspended while stopped | **PVC not backed up** — attachments live on local disk, not S3. Stopped: app at 0 replicas, DB hibernated, backups suspended (`apps/rammus/nocodb/kustomization.yaml` patches); remove the patches to restart |
 | **linkding** | `linkding-data-pvc` (1Gi, SQLite) | nothing | **No backup** |
 | **audiobookshelf** | config + metadata PVCs (500Mi each), audiobooks + podcasts PVCs (50Gi each) | nothing | **No backup**; media is reacquirable, config/metadata is not |
 | **soft-serve** | `repos` PVC (10Gi, Gopass store) | nothing | **No backup** — planned in `openspec/changes/backup-strategy`, never implemented. Mitigated only by every clone being a full copy |
