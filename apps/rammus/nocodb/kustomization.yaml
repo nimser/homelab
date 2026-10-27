@@ -12,3 +12,14 @@ resources:
   - nocodb-credentials.sops.yaml
   - rustfs-s3-credentials.sops.yaml
   - offsite-credentials.sops.yaml
+# NocoDB is stopped: no app pod, database hibernated with its PVC kept, backups suspended.
+patches:
+  - target: {kind: Deployment, name: nocodb}
+    patch: |
+      - {op: replace, path: /spec/replicas, value: 0}
+  - target: {kind: Cluster, name: nocodb-db}
+    patch: |
+      - {op: add, path: /metadata/annotations, value: {cnpg.io/hibernation: "on"}}
+  - target: {kind: ScheduledBackup}
+    patch: |
+      - {op: add, path: /spec/suspend, value: true}
