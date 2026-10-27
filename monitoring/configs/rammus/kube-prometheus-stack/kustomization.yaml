@@ -4,3 +4,12 @@ namespace: monitoring
 resources:
   - grafana-credentials.sops.yaml
   - grafana-tls-cert-selfsign.sops.yaml
+
+configMapGenerator:
+  - name: grafana-homelab-overview
+    files:
+      - homelab-overview.json=dashboards/homelab-overview.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "1"
