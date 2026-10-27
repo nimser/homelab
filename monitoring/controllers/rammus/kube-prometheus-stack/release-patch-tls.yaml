@@ -7,7 +7,9 @@ spec:
   values:
     grafana:
       ingress:
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-production
         tls:
-          - secretName: grafana-tls
+          - secretName: grafana-tailnet-tls
             hosts:
-              - gap.example.com
+              - gfn.tn.example.com

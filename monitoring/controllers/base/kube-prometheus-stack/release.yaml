@@ -35,4 +35,4 @@ spec:
         enabled: true
         ingressClassName: traefik
         hosts:
-          - gap.example.com
+          - gfn.tn.example.com
