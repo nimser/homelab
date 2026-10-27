@@ -20,6 +20,12 @@ spec:
             - --config
             - /etc/cloudflared/config/config.yaml
             - run
+          # A memory limit exempts the connector from the Talos OOM controller.
+          resources:
+            requests:
+              memory: 32Mi
+            limits:
+              memory: 256Mi
           livenessProbe:
             httpGet:
               path: /ready
