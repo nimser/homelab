@@ -9,3 +9,7 @@ patches:
     target:
       kind: HelmRelease
       name: kube-prometheus-stack
+  - path: release-patch-dashboards.yaml
+    target:
+      kind: HelmRelease
+      name: kube-prometheus-stack
