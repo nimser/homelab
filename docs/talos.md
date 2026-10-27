@@ -138,6 +138,7 @@ kubectx karma=admin@karma
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `network.yaml`        | DNS servers (1.1.1.1, 1.0.0.1, 8.8.8.8), NTP (time.cloudflare.com)                                                                         |
 | `podsecurity.yaml`    | Cluster-wide PodSecurity admission set to `privileged` — matches k3s behavior, no per-namespace labels needed                              |
+| `oom.yaml`            | OOM controller trigger with the v1.13.6 cooldown; drop once nodes run v1.13.6 or later                                                     |
 | `sops-age.sops.yaml`  | SOPS Age key for Flux secret decryption                                                                                                    |
 
 ## Network Configuration
@@ -152,6 +153,7 @@ kubectx karma=admin@karma
 
 ## Known Issues
 
+- **Leaked containerd shims under memory pressure** (Talos v1.13.2, containerd 2.2.3): when the Talos OOM controller SIGKILLs a pod cgroup, the pod's sandbox shim is never reaped and keeps ~6 MiB outside any pod cgroup. Without the `oom.yaml` cooldown the controller kills every few seconds and the leak feeds itself (siderolabs/talos#13622). The controller only ranks pods without a memory limit, so large workloads carry limits. `UnattributedNodeMemoryHigh` fires when non-pod memory stays above 2.3 GiB; list orphans with `talos/tools/shim-reaper.yaml`, then rerun it with `KILL=1`.
 - **Tolerations required**: Single-node clusters need `node-role.kubernetes.io/control-plane` tolerations on all workloads. The Flux tolerations patch is in `clusters/karma/flux-system/patches/controller-tolerations.yaml`.
 
 ## Tailscale Configuration

@@ -213,6 +213,7 @@ apply_config() {
     "--config-patch" "@${SCRIPT_DIR}/../talos/patches/network.yaml"
     "--config-patch" "@${SCRIPT_DIR}/../talos/patches/podsecurity.yaml"
     "--config-patch" "@${SCRIPT_DIR}/../talos/patches/scheduling.yaml"
+    "--config-patch" "@${SCRIPT_DIR}/../talos/patches/oom.yaml"
     "--config-patch" "@${hostname_patch}"
   )
 
