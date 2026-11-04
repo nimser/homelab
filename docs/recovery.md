@@ -26,6 +26,9 @@ the result, then writes `cnpg-backups/teable-db/_last-mirror`. A concurrent
 backup can fail the check and be completed by a retry. The RustFS writer is
 scoped to that prefix; the e2 credentials are shared with the Barman writer
 and scoped to the `cnpg-backups` bucket. The mirror only reads e2.
+The source declares SSE-KMS because its ETags are not plaintext MD5 hashes;
+RustFS uploads use multipart checksums. The final check compares sizes when
+no common hash is available, not a full byte-for-byte download verification.
 
 Both copies support **point-in-time recovery** within the available WAL
 window. Karma can lag e2 by five minutes plus the mirror duration; interrupted
