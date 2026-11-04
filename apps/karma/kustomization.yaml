@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - rustfs
   - offsite-sync
+  - postgres-mirror
