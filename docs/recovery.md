@@ -11,14 +11,31 @@ everything else in this repo rebuilds itself.
 
 | Tier | Where | What | Retention |
 |---|---|---|---|
-| Warm | RustFS on karma, bucket `cnpg-backups` | Postgres base backups + continuous WAL | 14d |
+| Warm | RustFS on karma, bucket `cnpg-backups` | Teable base backups + WAL mirrored from e2 every 5min | 30d |
 | Cold | offsite S3, bucket `cnpg-backups` | Postgres base backups + WAL | 30d |
 | Cold | offsite S3, bucket `offsite-objects` | RustFS objects (Teable attachments) | 30d of noncurrent versions |
 
-Postgres uses the CloudNativePG barman-cloud plugin, so both tiers support
-**point-in-time recovery** to any instant in the window — not just the last
-backup. Barman manages its own retention; the `cnpg-backups` buckets are
-deliberately **not** versioned and carry no lifecycle rules.
+Teable uses one CloudNativePG barman-cloud plugin targeting `offsite-store`:
+base backups run daily at 04:10 UTC and WAL archiving uses PostgreSQL's
+`archive_timeout=5min`. The upload takes additional time; idle segments with
+no writes do not rotate just to meet that interval.
+
+`apps/karma/postgres-mirror/` mirrors only `cnpg-backups/teable-db` from e2 to
+RustFS every five minutes. It copies payloads before Barman catalogs, checks
+the result, then writes `cnpg-backups/teable-db/_last-mirror`. A concurrent
+backup can fail the check and be completed by a retry. The RustFS writer is
+scoped to that prefix; the e2 credentials are shared with the Barman writer
+and scoped to the `cnpg-backups` bucket. The mirror only reads e2.
+
+Both copies support **point-in-time recovery** within the available WAL
+window. Karma can lag e2 by five minutes plus the mirror duration; interrupted
+runs extend that delay. Confirm a recent successful mirror and the selected
+backup's files before recovery. The first synchronization transfers the
+existing backup history; subsequent runs transfer changed objects only.
+
+Barman manages the 30-day retention on e2; the mirror propagates expiry to
+Karma. The `cnpg-backups` buckets are **not** versioned and carry no lifecycle
+rules or Object Lock, so neither copy is immutable.
 
 `offsite-objects` is the inverse: versioning on, lifecycle expiring noncurrent
 versions after 30d, written by a nightly `rclone sync`. Versioning is what
@@ -31,7 +48,7 @@ the other.
 
 | App | State | Backed up | Gap |
 |---|---|---|---|
-| **teable** | CNPG `teable-db`; attachments in RustFS `attachments-public`/`attachments-private`; Redis PVC (cache) | DB: warm + cold. Attachments: cold nightly | Redis is a disposable cache |
+| **teable** | CNPG `teable-db`; attachments in RustFS `attachments-public`/`attachments-private`; Redis PVC (cache) | DB: e2 daily + WAL, mirrored to Karma every 5min. Attachments: cold nightly | Redis is a disposable cache; Karma DB mirror depends on e2 |
 | **nocodb** | CNPG `nocodb-db`; `nocodb-data-pvc` (5Gi) | DB: warm + cold; suspended while stopped | **PVC not backed up** — attachments live on local disk, not S3. Stopped: app at 0 replicas, DB hibernated, backups suspended (`apps/rammus/nocodb/kustomization.yaml` patches); remove the patches to restart |
 | **linkding** | `linkding-data-pvc` (1Gi, SQLite) | nothing | **No backup** |
 | **audiobookshelf** | config + metadata PVCs (500Mi each), audiobooks + podcasts PVCs (50Gi each) | nothing | **No backup**; media is reacquirable, config/metadata is not |
@@ -80,10 +97,6 @@ spec:
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
-      parameters:
-        barmanObjectName: rustfs-store
-    - name: barman-cloud.cloudnative-pg.io
-      isWALArchiver: false
       parameters:
         barmanObjectName: offsite-store
 ```
@@ -183,4 +196,8 @@ from the machine holding the TPM.
   create delete markers), but a holder of the key could purge version history
   deliberately. offsite S3 scoping is bucket-level, and a scoped key cannot set
   a bucket policy on itself; closing this needs console/root action.
-- **Attachment RPO is 24h**, against a few seconds for Postgres.
+- **Attachment RPO is 24h**; PostgreSQL e2 lag is up to 5min plus upload time
+  while archiving is healthy. The Karma mirror adds up to 5min plus transfer time.
+- **Karma's Teable database copy depends on e2** for new backups and WAL.
+- **No backup freshness notification is configured.** Check Barman status and
+  `teable-postgres-mirror` jobs until external alerting is implemented.
