@@ -1,14 +1,10 @@
-# Warm backup object store for the teable-db cluster (Barman Cloud Plugin):
-# RustFS on karma, reached via the tailnet egress service. Receives
-# continuous WAL archiving (PITR) + daily base backups.
-# A second, offsite store is defined in offsite-objectstore.sops.yaml
-# (encrypted: the plugin requires provider details in spec fields).
+# Recovery source for the Teable base backups and WAL mirrored from e2 every 5m.
+# Barman writes to offsite-store; apps/karma/postgres-mirror owns the local copy.
 apiVersion: barmancloud.cnpg.io/v1
 kind: ObjectStore
 metadata:
   name: rustfs-store
 spec:
-  retentionPolicy: 14d
   configuration:
     destinationPath: s3://cnpg-backups/teable-db
     endpointURL: http://rustfs-egress:9000
