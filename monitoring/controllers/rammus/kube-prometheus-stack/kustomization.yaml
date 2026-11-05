@@ -5,6 +5,10 @@ resources:
   - ../../base/kube-prometheus-stack/
 
 patches:
+  - path: release-patch-host-metrics.yaml
+    target:
+      kind: HelmRelease
+      name: kube-prometheus-stack
   - path: release-patch-tls.yaml
     target:
       kind: HelmRelease

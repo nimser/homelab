@@ -46,7 +46,7 @@ spec:
               # Leaked containerd shims sit outside pod cgroups: node usage not attributed to pods (normally 1.2-1.8 GiB) grows.
               - alert: UnattributedNodeMemoryHigh
                 expr: |
-                  (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes)
+                  (node_memory_MemTotal_bytes{job="node-exporter",host="rammus"} - node_memory_MemAvailable_bytes{job="node-exporter",host="rammus"})
                     - on() sum(container_memory_working_set_bytes{container!="", container!="POD", id=~"/kubepods.*"})
                     > 2.3 * 1024^3
                 for: 30m
