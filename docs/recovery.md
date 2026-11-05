@@ -188,7 +188,16 @@ gopass behind a TPM plugin (`bg/age/homelab/age1s4h...`).
 **Without that key nothing above is recoverable** — not the database
 credentials, not the object store keys. It is the single point of failure for
 the entire recovery strategy and warrants an offline copy stored separately
-from the machine holding the TPM.
+from the machine holding the TPM. Listing the gopass entry and successfully
+using it to decrypt SOPS verifies access, not the existence of an independent
+offline recovery copy.
+
+Operator-generated Secrets, such as Prometheus's scrape configuration, are
+recreated from declarative resources rather than restored from gopass. A stale
+pod-mounted copy does not mean the API Secret or its credentials were lost.
+Grafana credentials are SOPS-encrypted in Git; compare decrypted and live values
+in memory without logging them. Follow the [monitoring recovery procedure](monitoring.md#secrets-and-safe-recovery)
+to refresh a stale configuration without deleting credential Secrets.
 
 ## Known gaps
 
