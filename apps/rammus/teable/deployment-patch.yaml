@@ -14,6 +14,12 @@ spec:
     spec:
       containers:
         - name: teable
+          # Import-time container OOMs need headroom beyond the unchanged 1536 MiB V8 heap cap.
+          resources:
+            requests:
+              memory: 2Gi
+            limits:
+              memory: 3Gi
           env:
             - name: PUBLIC_ORIGIN
               value: https://tbl.example.com
