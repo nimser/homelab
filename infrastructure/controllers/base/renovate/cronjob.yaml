@@ -6,8 +6,7 @@ metadata:
 spec:
   schedule: "@hourly"
   concurrencyPolicy: Forbid
-  # Update freeze around the 2026-10-29 workshop; set false on 2026-10-31.
-  suspend: true
+  suspend: false
   jobTemplate:
     spec:
       backoffLimit: 1
