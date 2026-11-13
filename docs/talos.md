@@ -153,7 +153,7 @@ kubectx karma=admin@karma
 
 ## Known Issues
 
-- **Leaked containerd shims under memory pressure** (Talos v1.13.2, containerd 2.2.3): when the Talos OOM controller SIGKILLs a pod cgroup, the pod's sandbox shim is never reaped and keeps ~6 MiB outside any pod cgroup. Without the `oom.yaml` cooldown the controller kills every few seconds and the leak feeds itself (siderolabs/talos#13622). The controller only ranks pods without a memory limit, so large workloads carry limits. `UnattributedNodeMemoryHigh` fires when non-pod memory stays above 2.3 GiB; list orphans with `talos/tools/shim-reaper.yaml`, then rerun it with `KILL=1`.
+- **Leaked containerd shims under memory pressure** (Talos v1.13.2, containerd 2.2.3): when the Talos OOM controller SIGKILLs a pod cgroup, the pod's sandbox shim is never reaped and keeps ~6 MiB outside any pod cgroup. Without the `oom.yaml` cooldown the controller kills every few seconds and the leak feeds itself (siderolabs/talos#13622). The controller only ranks pods with a container lacking a memory limit, native sidecars included, so large workloads and the barman-cloud sidecar (`instanceSidecarConfiguration` in Teable's `offsite-objectstore.sops.yaml`) carry limits. `UnattributedNodeMemoryHigh` fires when non-pod memory stays above 2.3 GiB; list orphans with `talos/tools/shim-reaper.yaml`, then rerun it with `KILL=1`.
 - **Tolerations required**: Single-node clusters need `node-role.kubernetes.io/control-plane` tolerations on all workloads. The Flux tolerations patch is in `clusters/karma/flux-system/patches/controller-tolerations.yaml`.
 
 ## Tailscale Configuration
