@@ -4,6 +4,12 @@ metadata:
   name: traefik
 spec:
   values:
+    # Peaks near 170 MiB; a limit keeps it out of the Talos OOM controller's victim ranking.
+    resources:
+      requests:
+        memory: 96Mi
+      limits:
+        memory: 384Mi
     providers:
       kubernetesIngress:
         publishedService:
