@@ -6,3 +6,8 @@ resources:
   - cloudflare.yaml
   - ingress.yaml
   - tunnel-credentials.sops.yaml
+# Audiobookshelf is stopped with its tunnel; PVCs are kept. Remove the patch to restart.
+patches:
+  - target: {kind: Deployment}
+    patch: |
+      - {op: replace, path: /spec/replicas, value: 0}

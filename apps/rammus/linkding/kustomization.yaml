@@ -7,3 +7,8 @@ resources:
   - ingress.yaml
   - tunnel-credentials.sops.yaml
   - linkding-credentials.sops.yaml
+# Linkding is stopped; its PVC is kept. Remove the patch to restart.
+patches:
+  - target: {kind: Deployment, name: linkding}
+    patch: |
+      - {op: replace, path: /spec/replicas, value: 0}
