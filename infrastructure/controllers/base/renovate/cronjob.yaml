@@ -4,7 +4,9 @@ metadata:
   name: renovate
   namespace: infrastructure
 spec:
-  schedule: "@hourly"
+  # Hourly 02:00-06:00 keeps its memory peak and automerged restarts out of daytime imports.
+  schedule: "0 2-6 * * *"
+  timeZone: Europe/Paris
   concurrencyPolicy: Forbid
   suspend: false
   jobTemplate:
