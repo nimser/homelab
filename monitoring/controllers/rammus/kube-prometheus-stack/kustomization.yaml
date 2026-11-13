@@ -17,3 +17,7 @@ patches:
     target:
       kind: HelmRelease
       name: kube-prometheus-stack
+  - path: release-patch-lean.yaml
+    target:
+      kind: HelmRelease
+      name: kube-prometheus-stack
