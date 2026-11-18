@@ -85,4 +85,7 @@ data:
         service: http://litellm.litellm.svc.cluster.local:4000
         originRequest:
           connectTimeout: 30s
+      # Razzia live quiz; the tunnel carries its Socket.IO WebSocket on /ws.
+      - hostname: rz.example.com
+        service: http://razzia.razzia.svc.cluster.local:3000
       - service: http_status:404
